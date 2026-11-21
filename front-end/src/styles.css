@@ -245,6 +245,12 @@ legend { font-weight: 600; font-size: 0.95rem; margin-bottom: 8px; }
 .stepper span { min-width: 56px; text-align: center; font-weight: 800; font-size: 1.15rem; }
 .total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px solid var(--bord); font-weight: 600; }
 
+.consent { display: flex; gap: 12px; align-items: flex-start; font-size: 0.9rem; color: var(--texte-2); cursor: pointer; margin-top: 14px; }
+.consent input { flex: none; width: 24px; height: 24px; margin: 0; accent-color: var(--or); cursor: pointer; }
+.legal p { color: var(--texte-2); }
+.legal strong { color: var(--texte); }
+.legal .title-sm:not(:first-child) { margin-top: 18px; }
+
 /* ------------------------------ Confirmation ------------------------------ */
 .success { display: flex; flex-direction: column; gap: 14px; text-align: center; align-items: stretch; }
 .success h3 { font-size: 1.4rem; }

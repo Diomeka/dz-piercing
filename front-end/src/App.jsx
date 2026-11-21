@@ -10,6 +10,7 @@ import Soins from "./pages/Soins.jsx";
 import Contact from "./pages/Contact.jsx";
 import Admin from "./pages/admin/Admin.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import Confidentialite from "./pages/Confidentialite.jsx";
 
 export default function App() {
   const { pathname } = useLocation();
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="galerie" element={<Galerie />} />
         <Route path="soins" element={<Soins />} />
         <Route path="contact" element={<Contact />} />
+        <Route path="confidentialite" element={<Confidentialite />} />
         <Route path="admin" element={<Admin />} />
         <Route path="*" element={<NotFound />} />
       </Route>

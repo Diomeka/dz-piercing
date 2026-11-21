@@ -63,7 +63,18 @@ cd front-end
 npm install
 npm run dev      # serveur de dev (accessible sur le réseau local)
 npm run build    # version de production dans front-end/dist
+npm run lint     # qualité du code (ESLint + règles React Hooks)
+npm test         # tests automatiques (Vitest + jsdom)
+npm run check    # lint + tests + build : à lancer avant chaque push
 ```
+
+**Intégration continue** : `.github/workflows/ci.yml` lance `lint`, `test` et `build` sur chaque
+pull request ; `deploy.yml` les relance avant de publier sur GitHub Pages (pas de publication si
+un test échoue).
+
+**Tests** : `src/lib/format.test.js` (prix, dates, créneaux), `src/api/api.test.js` (mode démo :
+RDV, commandes, admin), `src/App.test.jsx` (chaque page s'affiche sans planter — `scrollTo` est
+simulé comme dans les Chrome récents, qui renvoient une Promise).
 
 **Stack** : React 19, React Router 7 (HashRouter, pour fonctionner sur n'importe quel hébergement
 statique sans réécriture d'URL), Vite 8, CSS pur (`src/styles.css`, variables dans `:root`).
@@ -80,5 +91,6 @@ front-end/src/
 ```
 
 **Brancher le backend** : remplir `apiUrl` dans `front-end/src/config.js`
-(ex. `"https://api.dzpiercing.fr/api"`). Aucune page n'est à modifier : `api/index.js` bascule
+(ex. `"https://api.dzpiercing.fr/api"`), ou, pour tester en local sans toucher au code, copier
+`front-end/.env.example` en `front-end/.env` avec `VITE_API_URL=http://127.0.0.1:8000/api`. Aucune page n'est à modifier : `api/index.js` bascule
 automatiquement en mode REST. Le format exact des requêtes/réponses est dans **[BACKEND.md](BACKEND.md)**.

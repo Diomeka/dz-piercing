@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import api from "../api/index.js";
 import useData, { Chargement, Erreur } from "../components/useData.jsx";
 import Icon from "../components/Icon.jsx";
 import { useToast } from "../components/Toast.jsx";
+import Consentement from "../components/Consentement.jsx";
 import {
   aujourdhui, creneauxDuJour, formatDate, formatPrix, imageDe, lienWhatsApp, telValide,
 } from "../lib/format.js";
@@ -16,29 +17,19 @@ export default function RendezVous() {
   const [piercingId, setPiercingId] = useState(params.get("piercing") || "");
   const [date, setDate] = useState("");
   const [heure, setHeure] = useState("");
-  const [pris, setPris] = useState([]);
-  const [chargementCreneaux, setChargementCreneaux] = useState(false);
+  const creneauxPris = useData(() => (date ? api.rendezvous.booked(date) : []), [date]);
+  const pris = creneauxPris.data || [];
+  const chargementCreneaux = creneauxPris.loading;
   const [nom, setNom] = useState("");
   const [telephone, setTelephone] = useState("");
   const [message, setMessage] = useState("");
+  const [accord, setAccord] = useState(false);
   const [erreur, setErreur] = useState("");
   const [envoi, setEnvoi] = useState(false);
   const [confirme, setConfirme] = useState(null);
 
   const creneaux = date ? creneauxDuJour(date) : [];
   const piercing = (piercings.data || []).find((p) => p.id === piercingId);
-
-  useEffect(() => {
-    if (!date) return;
-    let annule = false;
-    setHeure("");
-    setChargementCreneaux(true);
-    api.rendezvous.booked(date)
-      .then((h) => !annule && setPris(h || []))
-      .catch(() => !annule && setPris([]))
-      .finally(() => !annule && setChargementCreneaux(false));
-    return () => { annule = true; };
-  }, [date]);
 
   async function valider(e) {
     e.preventDefault();
@@ -48,6 +39,7 @@ export default function RendezVous() {
     if (!heure) return setErreur("Choisis une heure.");
     if (!nom.trim()) return setErreur("Écris ton nom.");
     if (!telValide(telephone)) return setErreur("Numéro de téléphone invalide (10 chiffres minimum).");
+    if (!accord) return setErreur("Coche la case d'accord pour envoyer ta demande.");
     setEnvoi(true);
     try {
       const rdv = await api.rendezvous.create({
@@ -60,7 +52,7 @@ export default function RendezVous() {
     } catch (err) {
       setErreur(err.message);
       // le créneau a peut-être été pris entre-temps : on rafraîchit
-      api.rendezvous.booked(date).then((h) => setPris(h || [])).catch(() => {});
+      creneauxPris.reload();
     } finally {
       setEnvoi(false);
     }
@@ -127,7 +119,7 @@ export default function RendezVous() {
           <section className="card step">
             <h2><span className="step-num">2</span> Date et heure</h2>
             <input type="date" className="select-lg" value={date} min={aujourdhui()} max={aujourdhui(90)}
-              onChange={(e) => setDate(e.target.value)} aria-label="Date" />
+              onChange={(e) => { setDate(e.target.value); setHeure(""); }} aria-label="Date" />
             {date && creneaux === null && <p className="notice">Fermé ce jour-là, choisis une autre date.</p>}
             {date && creneaux && chargementCreneaux && <Chargement />}
             {date && creneaux && !chargementCreneaux && (
@@ -156,6 +148,7 @@ export default function RendezVous() {
             <label className="field">Téléphone<input value={telephone} onChange={(e) => setTelephone(e.target.value)} type="tel" inputMode="tel" autoComplete="tel" placeholder="06 12 34 56 78" /></label>
             <label className="field">Message (facultatif)<textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={2} placeholder="Une question, un bijou en particulier…" /></label>
             <p className="muted small">Mineur(e) ? Viens accompagné(e) d'un parent avec une pièce d'identité.</p>
+            <Consentement checked={accord} onChange={setAccord} />
           </section>
 
           {erreur && <p className="form-error">{erreur}</p>}

@@ -26,7 +26,7 @@ const storage = {
       localStorage.setItem(k, v);
     } catch (e) {
       if (e && e.name === "QuotaExceededError") {
-        throw new Error("Mémoire du navigateur pleine : supprime quelques photos (mode démo).");
+        throw new Error("Mémoire du navigateur pleine : supprime quelques photos (mode démo).", { cause: e });
       }
       memory[k] = v;
     }
@@ -63,7 +63,7 @@ function requireAdmin() {
 function crud(collection, prefix) {
   return {
     list: () => wait(loadDb()[collection]),
-    create: (data) => {
+    create: async (data) => {
       requireAdmin();
       const db = loadDb();
       const item = { ...data, id: newId(prefix) };
@@ -71,7 +71,7 @@ function crud(collection, prefix) {
       saveDb(db);
       return wait(item);
     },
-    update: (id, data) => {
+    update: async (id, data) => {
       requireAdmin();
       const db = loadDb();
       const i = db[collection].findIndex((x) => x.id === id);
@@ -80,7 +80,7 @@ function crud(collection, prefix) {
       saveDb(db);
       return wait(db[collection][i]);
     },
-    remove: (id) => {
+    remove: async (id) => {
       requireAdmin();
       const db = loadDb();
       db[collection] = db[collection].filter((x) => x.id !== id);
@@ -113,8 +113,8 @@ function resizeImage(file, max = 1000, quality = 0.82) {
 
 function statusApi(collection) {
   return {
-    list: () => { requireAdmin(); return wait(loadDb()[collection]); },
-    setStatus: (id, statut) => {
+    list: async () => { requireAdmin(); return wait(loadDb()[collection]); },
+    setStatus: async (id, statut) => {
       requireAdmin();
       const db = loadDb();
       const item = db[collection].find((x) => x.id === id);
@@ -123,7 +123,7 @@ function statusApi(collection) {
       saveDb(db);
       return wait(item);
     },
-    remove: (id) => {
+    remove: async (id) => {
       requireAdmin();
       const db = loadDb();
       db[collection] = db[collection].filter((x) => x.id !== id);
@@ -149,7 +149,7 @@ const demoApi = {
     // Public : renvoie seulement les heures déjà prises (pas les noms des clients)
     booked: (date) =>
       wait(loadDb().rendezvous.filter((r) => r.date === date && r.statut !== "refused").map((r) => r.heure)),
-    create: (data) => {
+    create: async (data) => {
       const db = loadDb();
       if (db.rendezvous.some((r) => r.date === data.date && r.heure === data.heure && r.statut !== "refused")) {
         throw new Error("Ce créneau vient d'être pris, choisis-en un autre.");
@@ -162,7 +162,7 @@ const demoApi = {
   },
   commandes: {
     ...statusApi("commandes"),
-    create: (data) => {
+    create: async (data) => {
       const db = loadDb();
       const b = db.bracelets.find((x) => x.id === data.braceletId);
       if (!b) throw new Error("Bracelet introuvable.");
@@ -175,7 +175,7 @@ const demoApi = {
       return wait(item);
     },
   },
-  uploadImage: (file) => { requireAdmin(); return resizeImage(file); },
+  uploadImage: async (file) => { requireAdmin(); return resizeImage(file); },
   resetDemo: () => { storage.remove(DB_KEY); },
 };
 

@@ -4,6 +4,7 @@ import useData, { Chargement, Erreur } from "../components/useData.jsx";
 import Modal from "../components/Modal.jsx";
 import Icon from "../components/Icon.jsx";
 import { useToast } from "../components/Toast.jsx";
+import Consentement from "../components/Consentement.jsx";
 import { couleurHex, formatPrix, imageDe, lienWhatsApp, telValide } from "../lib/format.js";
 
 export function Pastilles({ couleurs }) {
@@ -23,6 +24,7 @@ function CommandeModal({ bracelet, onClose }) {
   const [nom, setNom] = useState("");
   const [telephone, setTelephone] = useState("");
   const [message, setMessage] = useState("");
+  const [accord, setAccord] = useState(false);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState("");
   const [confirmee, setConfirmee] = useState(null);
@@ -33,6 +35,7 @@ function CommandeModal({ bracelet, onClose }) {
     if (bracelet.couleurs?.length && !couleur) return setErreur("Choisis une couleur.");
     if (!nom.trim()) return setErreur("Écris ton nom.");
     if (!telValide(telephone)) return setErreur("Numéro de téléphone invalide (10 chiffres minimum).");
+    if (!accord) return setErreur("Coche la case d'accord pour envoyer ta commande.");
     setEnvoi(true);
     try {
       const c = await api.commandes.create({
@@ -109,6 +112,7 @@ function CommandeModal({ bracelet, onClose }) {
         <label className="field">Ton téléphone<input value={telephone} onChange={(e) => setTelephone(e.target.value)} type="tel" autoComplete="tel" inputMode="tel" placeholder="06 12 34 56 78" /></label>
         <label className="field">Message (facultatif)<textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={2} placeholder="Taille du poignet, livraison ou retrait…" /></label>
 
+        <Consentement checked={accord} onChange={setAccord} />
         {erreur && <p className="form-error">{erreur}</p>}
 
         <div className="total-row"><span>Total</span><strong className="price price-lg">{formatPrix(bracelet.prix * quantite)}</strong></div>

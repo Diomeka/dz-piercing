@@ -1,23 +1,39 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-/** Charge des données via une fonction async. Renvoie { data, loading, error, reload }. */
+/**
+ * Charge des données via une fonction async.
+ * Renvoie { data, loading, error, reload }.
+ * `deps` : quand une de ces valeurs change, les données sont rechargées.
+ * Pendant un rechargement, les anciennes données restent affichées.
+ */
 export default function useData(loader, deps = []) {
-  const [state, setState] = useState({ data: null, loading: true, error: null });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const load = useCallback(loader, deps);
+  const [version, setVersion] = useState(0);
+  const [state, setState] = useState({ data: null, error: null, key: null });
+  const loaderRef = useRef(loader);
+  useEffect(() => {
+    loaderRef.current = loader;
+  });
 
-  const reload = useCallback(() => {
+  const key = `${JSON.stringify(deps)}#${version}`;
+
+  useEffect(() => {
     let annule = false;
-    setState((s) => ({ ...s, loading: true, error: null }));
     Promise.resolve()
-      .then(load)
-      .then((data) => !annule && setState({ data, loading: false, error: null }))
-      .catch((error) => !annule && setState({ data: null, loading: false, error }));
-    return () => { annule = true; };
-  }, [load]);
+      .then(() => loaderRef.current())
+      .then((data) => {
+        if (!annule) setState({ data, error: null, key });
+      })
+      .catch((error) => {
+        if (!annule) setState((s) => ({ data: s.data, error, key }));
+      });
+    return () => {
+      annule = true;
+    };
+  }, [key]);
 
-  useEffect(() => reload(), [reload]);
-  return { ...state, reload };
+  const reload = useCallback(() => setVersion((v) => v + 1), []);
+  const loading = state.key !== key;
+  return { data: state.data, error: loading ? null : state.error, loading, reload };
 }
 
 export function Chargement() {

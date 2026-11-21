@@ -4,7 +4,8 @@ Ce document décrit ce que le front-end (`front-end/src/api/index.js`) attend du
 Stack conseillée : **Laravel 12 + Sanctum** (jetons API), MySQL/PostgreSQL, stockage des images
 sur le disque `public` (ou S3).
 
-Le front passe en mode API dès que `apiUrl` est renseigné dans `front-end/src/config.js`.
+Le front passe en mode API dès que `apiUrl` est renseigné dans `front-end/src/config.js`
+(ou via `VITE_API_URL` dans `front-end/.env` pour le développement local — voir `.env.example`).
 Toutes les URL ci-dessous sont relatives à `apiUrl` (ex. `https://api.dzpiercing.fr/api`).
 
 ## Généralités

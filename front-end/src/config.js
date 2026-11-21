@@ -19,6 +19,12 @@ const CONFIG = {
 
   adresse: "12 rue de l'Exemple, 75000 Paris",
 
+  // Informations légales (obligatoires en France, affichées sur la page
+  // "Mentions légales & confidentialité")
+  responsable: "Prénom NOM",            // ton nom (ou le nom de ta société)
+  siret: "000 000 000 00000",           // ton numéro SIRET
+  emailContact: "contact@exemple.fr",   // e-mail pour les demandes RGPD
+
   // Horaires d'ouverture (0 = dimanche, 1 = lundi, ... 6 = samedi)
   // null = fermé ce jour-là
   horaires: {
@@ -45,7 +51,9 @@ const CONFIG = {
        navigateur (pratique pour tester, mais PAS partagées entre téléphones).
      - apiUrl rempli    → le site parle au vrai serveur (voir BACKEND.md).
      ---------------------------------------------------------------------- */
-  apiUrl: "",
+  // Peut aussi être fourni par la variable d'environnement VITE_API_URL
+  // (fichier front-end/.env, voir .env.example) sans modifier ce fichier.
+  apiUrl: import.meta.env?.VITE_API_URL || "",
 
   // Mot de passe admin du MODE DÉMO uniquement.
   // En production, le mot de passe est vérifié par le serveur.

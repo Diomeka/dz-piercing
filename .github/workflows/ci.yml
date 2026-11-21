@@ -1,0 +1,31 @@
+name: Vérifier le front-end
+
+# Tourne sur chaque proposition de modification (pull request) et chaque branche
+# autre que main : qualité du code (ESLint), tests (Vitest) et construction (Vite).
+on:
+  pull_request:
+    paths: ["front-end/**", ".github/workflows/ci.yml"]
+  push:
+    branches-ignore: [main]
+    paths: ["front-end/**", ".github/workflows/ci.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: front-end
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: front-end/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build

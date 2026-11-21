@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import CONFIG from "../config.js";
 import Icon from "./Icon.jsx";
+import ErrorBoundary from "./ErrorBoundary.jsx";
 
 const PRINCIPAUX = [
   { to: "/", label: "Accueil", icon: "home", end: true },
@@ -25,11 +26,11 @@ export function Logo({ size = "md" }) {
 }
 
 export default function Layout() {
-  const [menuOuvert, setMenuOuvert] = useState(false);
   const { pathname } = useLocation();
-  useEffect(() => {
-    setMenuOuvert(false);
-  }, [pathname]);
+  // On retient sur quelle page le menu a été ouvert : il se ferme tout seul en changeant de page
+  const [menuOuvertSur, setMenuOuvertSur] = useState(null);
+  const menuOuvert = menuOuvertSur === pathname;
+  const setMenuOuvert = (ouvert) => setMenuOuvertSur(ouvert ? pathname : null);
   const surSecondaire = SECONDAIRES.some((l) => pathname.startsWith(l.to)) || pathname.startsWith("/admin");
 
   return (
@@ -47,7 +48,10 @@ export default function Layout() {
       </header>
 
       <main className="main">
-        <Outlet />
+        {/* key = page : changer de page efface l'erreur ; le menu reste utilisable */}
+        <ErrorBoundary key={pathname}>
+          <Outlet />
+        </ErrorBoundary>
       </main>
 
       <footer className="footer">
@@ -57,6 +61,7 @@ export default function Layout() {
           <p className="footer-links">
             <a href={CONFIG.instagram} target="_blank" rel="noreferrer">Instagram</a>
             <a href={CONFIG.tiktok} target="_blank" rel="noreferrer">TikTok</a>
+            <Link to="/confidentialite">Mentions légales & confidentialité</Link>
             <Link to="/admin">Espace admin</Link>
           </p>
           <p className="muted small">© {new Date().getFullYear()} {CONFIG.nomBoutique}</p>
