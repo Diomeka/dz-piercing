@@ -16,6 +16,7 @@ const CONFIG = {
 
   instagram: "https://www.instagram.com/dzpiercing",
   tiktok: "https://www.tiktok.com/@dzpiercing",
+  facebook: "https://www.facebook.com/dzpiercing",
 
   adresse: "12 rue de l'Exemple, Pétion-Ville, Haïti",
 

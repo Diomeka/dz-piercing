@@ -85,6 +85,7 @@ describe("Pied de page", () => {
     const el = await ouvrir("");
     const pied = el.querySelector(".footer");
     expect(pied.querySelector('a[aria-label="Instagram"]')).not.toBeNull();
+    expect(pied.querySelector('a.reseau-facebook[aria-label="Facebook"]').href).toMatch(/^https:\/\/www\.facebook\.com\//);
     expect(pied.querySelector('a.reseau-whatsapp[aria-label="WhatsApp"]').href).toMatch(/^https:\/\/wa\.me\/509/);
     expect(pied.textContent).not.toMatch(/youtube/i);
     const noms = [...pied.querySelectorAll(".paiement")].map((p) => p.dataset.nom);

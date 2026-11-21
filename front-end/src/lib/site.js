@@ -55,7 +55,7 @@ export function defauts() {
       emailContact: CONFIG.emailContact,
     },
     horaires: structuredClone(CONFIG.horaires),
-    reseaux: { instagram: CONFIG.instagram || "", tiktok: CONFIG.tiktok || "", facebook: "", snapchat: "", x: "" },
+    reseaux: { instagram: CONFIG.instagram || "", tiktok: CONFIG.tiktok || "", facebook: CONFIG.facebook || "", snapchat: "", x: "" },
     menus: Object.fromEntries(PAGES_MENU.map((p) => [p.id, { visible: true, label: p.label }])),
     legal: { responsable: CONFIG.responsable, nif: CONFIG.nif },
     paiements: Object.fromEntries(MOYENS_PAIEMENT.map((m) => [m.id, { actif: true, logo: "" }])),
