@@ -3,7 +3,8 @@ import api from "../../api/index.js";
 import useData, { Chargement, Erreur } from "../../components/useData.jsx";
 import Icon from "../../components/Icon.jsx";
 import { useToast } from "../../components/Toast.jsx";
-import { STATUTS, formatDate, formatPrix, versWhatsApp } from "../../lib/format.js";
+import { STATUTS, formatDate, versWhatsApp } from "../../lib/format.js";
+import { libellePrestation } from "../RendezVous.jsx";
 
 const FILTRES = [
   { id: "pending", label: "En attente" },
@@ -12,15 +13,12 @@ const FILTRES = [
   { id: "all", label: "Tous" },
 ];
 
-function messageClient(type, item, statut) {
-  if (type === "rendezvous") {
-    return statut === "accepted"
-      ? `Bonjour ${item.nom}, c'est DZ PIERCING ✨ Ton rendez-vous pour un piercing ${item.piercingNom} est CONFIRMÉ le ${formatDate(item.date)} à ${item.heure}. À très vite ! (Réf. ${item.reference})`
-      : `Bonjour ${item.nom}, c'est DZ PIERCING. Désolé, je ne suis pas disponible le ${formatDate(item.date)} à ${item.heure}. Tu peux reprendre un autre créneau sur le site 🙏 (Réf. ${item.reference})`;
-  }
+/** Message WhatsApp prêt à envoyer au client après « Accepter » / « Refuser » */
+function messageClient(item, statut) {
+  const quoi = libellePrestation(item) + (item.couleur ? ` (${item.couleur})` : "");
   return statut === "accepted"
-    ? `Bonjour ${item.nom}, c'est DZ PIERCING ✨ Ta commande ${item.quantite} × ${item.braceletNom}${item.couleur ? ` (${item.couleur})` : ""} est CONFIRMÉE. Total : ${formatPrix(item.total)}. (Réf. ${item.reference})`
-    : `Bonjour ${item.nom}, c'est DZ PIERCING. Désolé, ta commande ${item.braceletNom} ne peut pas être honorée pour le moment. (Réf. ${item.reference})`;
+    ? `Bonjour ${item.nom}, c'est DZ PIERCING ✨ Ton rendez-vous (${quoi}) est CONFIRMÉ le ${formatDate(item.date)} à ${item.heure}. À très vite ! (Réf. ${item.reference})`
+    : `Bonjour ${item.nom}, c'est DZ PIERCING. Désolé, je ne suis pas disponible le ${formatDate(item.date)} à ${item.heure}. Tu peux reprendre un autre créneau sur le site 🙏 (Réf. ${item.reference})`;
 }
 
 export default function Demandes({ type, tick = 0, onChange, onError }) {
@@ -29,10 +27,7 @@ export default function Demandes({ type, tick = 0, onChange, onError }) {
   const [filtre, setFiltre] = useState("pending");
   const [occupe, setOccupe] = useState(null);
 
-  const tri = (a, b) =>
-    type === "rendezvous"
-      ? `${a.date} ${a.heure}`.localeCompare(`${b.date} ${b.heure}`)
-      : String(b.creeLe).localeCompare(String(a.creeLe));
+  const tri = (a, b) => `${a.date} ${a.heure}`.localeCompare(`${b.date} ${b.heure}`);
   const liste = (data || []).filter((x) => filtre === "all" || x.statut === filtre).sort(tri);
   const nbAttente = (data || []).filter((x) => x.statut === "pending").length;
 
@@ -88,19 +83,12 @@ export default function Demandes({ type, tick = 0, onChange, onError }) {
                 <span className={`badge ${s.cls}`}>{s.label}</span>
               </div>
 
-              {type === "rendezvous" ? (
-                <dl className="recap compact">
-                  <dt>Piercing</dt><dd>{x.piercingNom}</dd>
-                  <dt>Date</dt><dd className="capitalize">{formatDate(x.date)}</dd>
-                  <dt>Heure</dt><dd>{x.heure}</dd>
-                </dl>
-              ) : (
-                <dl className="recap compact">
-                  <dt>Bracelet</dt><dd>{x.braceletNom}{x.couleur ? ` — ${x.couleur}` : ""}</dd>
-                  <dt>Quantité</dt><dd>{x.quantite}</dd>
-                  <dt>Total</dt><dd className="price">{formatPrix(x.total)}</dd>
-                </dl>
-              )}
+              <dl className="recap compact">
+                <dt>{x.prestationType === "braces" ? "Braces" : "Piercing"}</dt><dd>{x.prestationNom}</dd>
+                {x.couleur && <><dt>Couleur</dt><dd>{x.couleur}</dd></>}
+                <dt>Date</dt><dd className="capitalize">{formatDate(x.date)}</dd>
+                <dt>Heure</dt><dd>{x.heure}</dd>
+              </dl>
               {x.message && <p className="quote">« {x.message} »</p>}
               <p className="muted small">Réf. {x.reference}</p>
 
@@ -116,7 +104,7 @@ export default function Demandes({ type, tick = 0, onChange, onError }) {
               ) : (
                 <div className="row-2">
                   <a className="btn btn-whatsapp" target="_blank" rel="noreferrer"
-                    href={`https://wa.me/${versWhatsApp(x.telephone)}?text=${encodeURIComponent(messageClient(type, x, x.statut))}`}>
+                    href={`https://wa.me/${versWhatsApp(x.telephone)}?text=${encodeURIComponent(messageClient(x, x.statut))}`}>
                     <Icon name="whatsapp" /> Prévenir le client
                   </a>
                   <button className="btn btn-outline" onClick={() => changer(x, "pending")}>Remettre en attente</button>

@@ -86,8 +86,8 @@ export default function Reglages({ onError }) {
             ))}
             <label className="consent"><input type="checkbox" checked={v.afficherPiercings}
               onChange={(e) => set((x) => ({ ...x, afficherPiercings: e.target.checked }))} /> Afficher « Piercings populaires »</label>
-            <label className="consent"><input type="checkbox" checked={v.afficherBracelets}
-              onChange={(e) => set((x) => ({ ...x, afficherBracelets: e.target.checked }))} /> Afficher « La boutique bracelets »</label>
+            <label className="consent"><input type="checkbox" checked={v.afficherBraces}
+              onChange={(e) => set((x) => ({ ...x, afficherBraces: e.target.checked }))} /> Afficher « Nos braces »</label>
           </>
         )} />
 

@@ -1,7 +1,7 @@
 {
   "name": "DZ PIERCING",
   "short_name": "DZ Piercing",
-  "description": "Piercings et bracelets — prends rendez-vous en ligne.",
+  "description": "Piercings et braces — prends rendez-vous en ligne.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { rendezVousIcs } from "./agenda.js";
 
-const RDV = { id: "r1", reference: "DZ-AB12C", piercingNom: "Hélix", date: "2027-01-05", heure: "14:30" };
+const RDV = { id: "r1", reference: "DZ-AB12C", prestationType: "piercing", prestationNom: "Hélix", date: "2027-01-05", heure: "14:30" };
 
 describe("Fichier agenda (.ics)", () => {
   const ics = rendezVousIcs(RDV, 20);

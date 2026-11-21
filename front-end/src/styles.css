@@ -508,3 +508,9 @@ legend { font-weight: 600; font-size: 0.95rem; margin-bottom: 8px; }
   .admin-bar .btn-sm { min-height: 38px; padding: 6px 9px; font-size: 0.8rem; gap: 5px; white-space: nowrap; }
   .admin-bar .btn-sm svg { width: 16px; height: 16px; }
 }
+
+/* ------------------------------ Braces ------------------------------ */
+.braces-info ul { margin: 0 0 12px; padding-left: 20px; color: var(--texte-2); display: grid; gap: 8px; }
+.braces-info strong { color: var(--texte); }
+.braces-soins span { color: var(--or-texte) !important; }
+.step-couleur { margin-top: 16px; }

@@ -46,7 +46,7 @@ export default function Inscription() {
       <form className="card form auth" onSubmit={valider} noValidate>
         <div className="success-icon"><Icon name="user" size={32} /></div>
         <h1 className="page-title center">Créer un compte</h1>
-        <p className="muted center">Pour suivre tes rendez-vous et commandes, sans retaper tes infos.</p>
+        <p className="muted center">Pour suivre tes rendez-vous, sans retaper tes infos.</p>
 
         <label className="field">Nom<input value={f.nom} onChange={set("nom")} autoComplete="name" placeholder="Prénom Nom" /></label>
         <label className="field">E-mail<input type="email" value={f.email} onChange={set("email")} autoComplete="email" inputMode="email" placeholder="ton@email.com" /></label>

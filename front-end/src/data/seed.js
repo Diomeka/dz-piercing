@@ -27,19 +27,20 @@ const SEED = {
       description: "Un incontournable de l'été. Bijou banane avec pierre au choix.", image: "" },
   ],
 
-  bracelets: [
-    { id: "b1", nom: "Chaîne Cubaine", prix: 29, couleurs: ["Doré", "Argent", "Noir"], disponible: true,
-      description: "Maille cubaine épaisse en acier inoxydable. Ne noircit pas.", image: "" },
-    { id: "b2", nom: "Jonc Gravé DZ", prix: 35, couleurs: ["Doré", "Argent"], disponible: true,
-      description: "Jonc rigide avec gravure DZ. Ajustable à tous les poignets.", image: "" },
-    { id: "b3", nom: "Perles Onyx", prix: 19, couleurs: ["Noir", "Blanc"], disponible: true,
-      description: "Pierres naturelles 8 mm sur fil élastique, avec perle dorée.", image: "" },
-    { id: "b4", nom: "Tressé Street", prix: 15, couleurs: ["Noir", "Rouge", "Bleu", "Blanc"], disponible: true,
-      description: "Cordon tressé à la main avec fermoir réglable. Waterproof.", image: "" },
-    { id: "b5", nom: "Chaîne Fine Zircon", prix: 25, couleurs: ["Doré", "Argent", "Or rose"], disponible: true,
-      description: "Chaîne fine sertie de petits zircons. Élégance au quotidien.", image: "" },
-    { id: "b6", nom: "Manchette Noire", prix: 32, couleurs: ["Noir"], disponible: false,
-      description: "Manchette en cuir noir et acier. Bientôt de retour en stock.", image: "" },
+  // Braces de mode (décoratifs) — posés au salon sur rendez-vous
+  braces: [
+    { id: "br1", nom: "Braces métal classiques", prix: 40, duree: 45, couleurs: ["Argent"], disponible: true,
+      description: "Le look braces original : attaches métal et fil argent. Discret et intemporel.", image: "" },
+    { id: "br2", nom: "Braces élastiques couleur", prix: 45, duree: 45, couleurs: ["Noir", "Rouge", "Bleu", "Rose", "Vert", "Violet"], disponible: true,
+      description: "Attaches avec élastiques de couleur au choix. Le plus demandé !", image: "" },
+    { id: "br3", nom: "Braces arc-en-ciel", prix: 50, duree: 50, couleurs: ["Multicolore"], disponible: true,
+      description: "Une couleur différente sur chaque dent. Style street garanti.", image: "" },
+    { id: "br4", nom: "Braces dorés", prix: 60, duree: 45, couleurs: ["Doré"], disponible: true,
+      description: "Attaches couleur or pour un sourire qui brille.", image: "" },
+    { id: "br5", nom: "Braces strass", prix: 70, duree: 60, couleurs: ["Argent", "Doré"], disponible: true,
+      description: "Attaches serties de petits strass qui accrochent la lumière.", image: "" },
+    { id: "br6", nom: "Braces noirs mat", prix: 45, duree: 45, couleurs: ["Noir"], disponible: false,
+      description: "Attaches noires mates, effet mystérieux. Bientôt de retour.", image: "" },
   ],
 
   galerie: [
@@ -54,18 +55,16 @@ const SEED = {
   ],
 
   rendezvous: [
-    { id: "r1", reference: "DZ-A7K2P", piercingId: "p2", piercingNom: "Hélix", date: "2026-12-02", heure: "14:30",
+    { id: "r1", reference: "DZ-A7K2P", prestationType: "piercing", prestationId: "p2", prestationNom: "Hélix", date: "2026-12-02", heure: "14:30",
       nom: "Sarah B.", telephone: "3711-2233", message: "Premier piercing cartilage 🙂", statut: "pending",
       creeLe: "2026-11-20T10:12:00" },
+    { id: "r2", reference: "DZ-K3B8W", prestationType: "braces", prestationId: "br2", prestationNom: "Braces élastiques couleur",
+      couleur: "Rose", date: "2026-12-03", heure: "11:00", nom: "Yanis K.", telephone: "4855-6677", message: "",
+      statut: "pending", creeLe: "2026-11-19T18:40:00" },
   ],
 
   // Comptes clients (créés via « Créer un compte »)
   utilisateurs: [],
 
-  commandes: [
-    { id: "c1", reference: "DZ-Q9M4T", braceletId: "b1", braceletNom: "Chaîne Cubaine", couleur: "Doré", quantite: 2,
-      prixUnitaire: 29, total: 58, nom: "Yanis K.", telephone: "4855-6677", message: "", statut: "pending",
-      creeLe: "2026-11-19T18:40:00" },
-  ],
 };
 export default SEED;

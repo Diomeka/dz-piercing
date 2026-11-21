@@ -24,6 +24,15 @@ const SPECIFIQUES = [
   { zone: "Nez & visage", conseils: "Attention en t'essuyant le visage et en enlevant un pull. Pas de crème ou maquillage directement dessus." },
 ];
 
+/** Entretien des braces de mode (décoratifs) */
+const SOINS_BRACES = [
+  "Brosse-toi les dents après chaque repas, en insistant autour des attaches (une petite brosse interdentaire aide beaucoup).",
+  "Évite les aliments très durs ou collants (caramel, chewing-gum, glaçons) : ils décollent les attaches.",
+  "Rince-toi la bouche à l'eau ou avec un bain de bouche sans alcool.",
+  "Une attache se décolle ou un fil pique ? Ne tire pas dessus : contacte-nous pour la réparer.",
+  "Douleur, saignement ou gencive qui gonfle : retire-les au salon et consulte un dentiste.",
+];
+
 const DUREES = [
   ["Lobe", "6 à 8 semaines"], ["Langue", "4 à 6 semaines"], ["Narine / Septum", "2 à 4 mois"],
   ["Sourcil / Labret", "2 à 3 mois"], ["Hélix / Tragus", "3 à 6 mois"], ["Nombril", "6 à 12 mois"],
@@ -33,7 +42,8 @@ export default function Soins() {
   return (
     <div className="container page narrow">
       <h1 className="page-title">Soins après piercing</h1>
-      <p className="page-sub">Un piercing bien soigné, c'est un piercing qui cicatrise vite et reste beau.</p>
+      <p className="page-sub">Un piercing bien soigné, c'est un piercing qui cicatrise vite et reste beau.
+        {" "}<a href="#soins-braces" className="link-gold">Tu as des braces ? Voir l'entretien →</a></p>
 
       <section className="section">
         <h2 className="title">Chaque jour</h2>
@@ -73,6 +83,14 @@ export default function Soins() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section className="section" id="soins-braces">
+        <h2 className="title">Entretien des braces</h2>
+        <ul className="card avoid-list braces-soins">
+          {SOINS_BRACES.map((t) => <li key={t}><span aria-hidden="true">✦</span>{t}</li>)}
+        </ul>
+        <p className="muted small">Nos braces sont <strong>décoratifs</strong> : ils ne corrigent pas l'alignement des dents.</p>
       </section>
 
       <section className="card alert">

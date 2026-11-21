@@ -7,15 +7,27 @@ import { useToast } from "../components/Toast.jsx";
 import Consentement from "../components/Consentement.jsx";
 import { ajouterAgenda } from "../lib/agenda.js";
 import {
-  aujourdhui, creneauxDuJour, formatDate, formatPrix, imageDe, lienWhatsApp, telValide,
+  aujourdhui, couleurHex, creneauxDuJour, formatDate, formatPrix, imageDe, lienWhatsApp, telValide,
 } from "../lib/format.js";
+
+/** Libellé d'une prestation : « Piercing Hélix » ou « Braces dorés » */
+export const libellePrestation = (r) =>
+  r.prestationType === "braces" ? r.prestationNom : `Piercing ${r.prestationNom}`;
 
 export default function RendezVous() {
   const toast = useToast();
   const [params] = useSearchParams();
-  const piercings = useData(() => api.piercings.list());
+  // Piercings ET braces : les deux se réservent au salon
+  const catalogue = useData(async () => {
+    const [piercings, braces] = await Promise.all([api.piercings.list(), api.braces.list()]);
+    return { piercings, braces: braces.filter((b) => b.disponible !== false) };
+  });
 
-  const [piercingId, setPiercingId] = useState(params.get("piercing") || "");
+  // Choix encodé "type:id" (ex. "piercing:p2", "braces:br1") — pré-rempli depuis le lien
+  const [choix, setChoix] = useState(
+    params.get("braces") ? `braces:${params.get("braces")}` : params.get("piercing") ? `piercing:${params.get("piercing")}` : ""
+  );
+  const [couleur, setCouleur] = useState("");
   const [date, setDate] = useState("");
   const [heure, setHeure] = useState("");
   const creneauxPris = useData(() => (date ? api.rendezvous.booked(date) : []), [date]);
@@ -31,12 +43,19 @@ export default function RendezVous() {
   const [confirme, setConfirme] = useState(null);
 
   const creneaux = date ? creneauxDuJour(date) : [];
-  const piercing = (piercings.data || []).find((p) => p.id === piercingId);
+  const [type, id] = choix.split(":");
+  const prestation = type === "braces"
+    ? (catalogue.data?.braces || []).find((b) => b.id === id)
+    : (catalogue.data?.piercings || []).find((p) => p.id === id);
+  const couleurs = type === "braces" ? prestation?.couleurs || [] : [];
+  // une seule couleur proposée → choisie d'office
+  const couleurChoisie = couleurs.length === 1 ? couleurs[0] : couleur;
 
   async function valider(e) {
     e.preventDefault();
     setErreur("");
-    if (!piercing) return setErreur("Choisis un piercing.");
+    if (!prestation) return setErreur("Choisis un piercing ou des braces.");
+    if (couleurs.length > 1 && !couleurChoisie) return setErreur("Choisis la couleur de tes braces.");
     if (!date) return setErreur("Choisis une date.");
     if (!heure) return setErreur("Choisis une heure.");
     if (!nom.trim()) return setErreur("Écris ton nom.");
@@ -45,8 +64,9 @@ export default function RendezVous() {
     setEnvoi(true);
     try {
       const rdv = await api.rendezvous.create({
-        piercingId: piercing.id, piercingNom: piercing.nom, date, heure,
-        nom: nom.trim(), telephone: telephone.trim(), message: message.trim(),
+        prestationType: type, prestationId: prestation.id, prestationNom: prestation.nom,
+        couleur: type === "braces" ? couleurChoisie : "",
+        date, heure, nom: nom.trim(), telephone: telephone.trim(), message: message.trim(),
       });
       setConfirme(rdv);
       toast("Demande de rendez-vous envoyée ✔");
@@ -61,7 +81,8 @@ export default function RendezVous() {
   }
 
   if (confirme) {
-    const texte = `Bonjour DZ PIERCING ! J'ai demandé un RDV pour un piercing ${confirme.piercingNom} ` +
+    const quoi = libellePrestation(confirme) + (confirme.couleur ? ` (${confirme.couleur})` : "");
+    const texte = `Bonjour DZ PIERCING ! J'ai demandé un RDV : ${quoi}, ` +
       `le ${formatDate(confirme.date)} à ${confirme.heure}. Référence ${confirme.reference}. — ${confirme.nom}`;
     return (
       <div className="container page narrow">
@@ -71,12 +92,13 @@ export default function RendezVous() {
           <p>Ta demande de rendez-vous est bien reçue. Je la confirme rapidement par message au <strong>{confirme.telephone}</strong>.</p>
           <dl className="recap">
             <dt>Référence</dt><dd>{confirme.reference}</dd>
-            <dt>Piercing</dt><dd>{confirme.piercingNom}</dd>
+            <dt>Prestation</dt><dd>{libellePrestation(confirme)}</dd>
+            {confirme.couleur && <><dt>Couleur</dt><dd>{confirme.couleur}</dd></>}
             <dt>Date</dt><dd className="capitalize">{formatDate(confirme.date)}</dd>
             <dt>Heure</dt><dd>{confirme.heure}</dd>
             <dt>Statut</dt><dd><span className="badge badge-pending">En attente de confirmation</span></dd>
           </dl>
-          <button className="btn btn-gold btn-block" onClick={() => ajouterAgenda(confirme, piercing?.duree)}>
+          <button className="btn btn-gold btn-block" onClick={() => ajouterAgenda(confirme, prestation?.duree)}>
             <Icon name="calendar" /> Ajouter à mon agenda
           </button>
           <a className="btn btn-whatsapp btn-block" href={lienWhatsApp(texte)} target="_blank" rel="noreferrer">
@@ -95,31 +117,53 @@ export default function RendezVous() {
   return (
     <div className="container page narrow">
       <h1 className="page-title">Prendre rendez-vous</h1>
-      <p className="page-sub">3 étapes, moins d'une minute.</p>
+      <p className="page-sub">Piercing ou pose de braces : 3 étapes, moins d'une minute.</p>
 
-      {piercings.loading && <Chargement />}
-      {piercings.error && <Erreur error={piercings.error} onRetry={piercings.reload} />}
+      {catalogue.loading && <Chargement />}
+      {catalogue.error && <Erreur error={catalogue.error} onRetry={catalogue.reload} />}
 
-      {piercings.data && (
+      {catalogue.data && (
         <form className="form" onSubmit={valider}>
           {/* ÉTAPE 1 */}
           <section className="card step">
-            <h2><span className="step-num">1</span> Ton piercing</h2>
-            <select value={piercingId} onChange={(e) => setPiercingId(e.target.value)} className="select-lg" aria-label="Piercing">
-              <option value="">— Choisir un piercing —</option>
-              {piercings.data.map((p) => (
-                <option key={p.id} value={p.id}>{p.nom} — {formatPrix(p.prix)}</option>
-              ))}
+            <h2><span className="step-num">1</span> Ta prestation</h2>
+            <select value={choix} onChange={(e) => { setChoix(e.target.value); setCouleur(""); }} className="select-lg" aria-label="Prestation">
+              <option value="">— Choisir un piercing ou des braces —</option>
+              <optgroup label="Piercings">
+                {catalogue.data.piercings.map((p) => (
+                  <option key={p.id} value={`piercing:${p.id}`}>{p.nom} — {formatPrix(p.prix)}</option>
+                ))}
+              </optgroup>
+              {catalogue.data.braces.length > 0 && (
+                <optgroup label="Braces (pose)">
+                  {catalogue.data.braces.map((b) => (
+                    <option key={b.id} value={`braces:${b.id}`}>{b.nom} — {formatPrix(b.prix)}</option>
+                  ))}
+                </optgroup>
+              )}
             </select>
-            {piercing && (
+            {prestation && (
               <div className="order-head">
-                <img src={imageDe(piercing, "piercing")} alt="" />
+                <img src={imageDe(prestation, type === "braces" ? "braces" : "piercing")} alt="" />
                 <div>
-                  <strong>{piercing.nom}</strong>
-                  <span className="price">{formatPrix(piercing.prix)}</span>
-                  {piercing.duree ? <small className="muted">Environ {piercing.duree} min</small> : null}
+                  <strong>{prestation.nom}</strong>
+                  <span className="price">{formatPrix(prestation.prix)}</span>
+                  {prestation.duree ? <small className="muted">Environ {prestation.duree} min</small> : null}
                 </div>
               </div>
+            )}
+            {couleurs.length > 1 && (
+              <fieldset className="step-couleur">
+                <legend>Couleur</legend>
+                <div className="color-pick">
+                  {couleurs.map((c) => (
+                    <label key={c} className={`color-opt ${couleurChoisie === c ? "active" : ""}`}>
+                      <input type="radio" name="couleur" value={c} checked={couleurChoisie === c} onChange={() => setCouleur(c)} />
+                      <span className="swatch" style={{ background: couleurHex(c) }} /> {c}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
             )}
           </section>
 

@@ -1,9 +1,9 @@
 import { lazy, Suspense, useEffect } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Navigate, Routes, Route, useLocation } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
 import Accueil from "./pages/Accueil.jsx";
 import Piercings from "./pages/Piercings.jsx";
-import Bracelets from "./pages/Bracelets.jsx";
+import Braces from "./pages/Braces.jsx";
 import RendezVous from "./pages/RendezVous.jsx";
 import Galerie from "./pages/Galerie.jsx";
 import Soins from "./pages/Soins.jsx";
@@ -18,6 +18,12 @@ import { Chargement } from "./components/useData.jsx";
 // L'admin n'est téléchargé que si on l'ouvre : le site reste léger pour les clients
 const Admin = lazy(() => import("./pages/admin/Admin.jsx"));
 
+/** Le formulaire repart de zéro quand le lien change (ex. autre modèle de braces choisi). */
+function RendezVousSelonLien() {
+  const { search } = useLocation();
+  return <RendezVous key={search} />;
+}
+
 export default function App() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -30,8 +36,9 @@ export default function App() {
       <Route element={<Layout />}>
         <Route index element={<Accueil />} />
         <Route path="piercings" element={<Piercings />} />
-        <Route path="bracelets" element={<Bracelets />} />
-        <Route path="rendez-vous" element={<RendezVous />} />
+        <Route path="braces" element={<Braces />} />
+        <Route path="bracelets" element={<Navigate to="/braces" replace />} /> {/* ancienne adresse */}
+        <Route path="rendez-vous" element={<RendezVousSelonLien />} />
         <Route path="galerie" element={<Galerie />} />
         <Route path="soins" element={<Soins />} />
         <Route path="contact" element={<Contact />} />

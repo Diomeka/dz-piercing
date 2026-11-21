@@ -22,10 +22,10 @@ export default function Confidentialite() {
 
       <section className="card section">
         <h2 className="title-sm">Tes données personnelles</h2>
-        <p><strong>Quelles données ?</strong> Quand tu prends rendez-vous, passes commande ou crées un compte,
+        <p><strong>Quelles données ?</strong> Quand tu prends rendez-vous ou crées un compte,
           nous enregistrons ton nom, ton numéro de téléphone, ton e-mail (pour un compte), ton éventuel
           message et le détail de ta demande.</p>
-        <p><strong>Pourquoi ?</strong> Uniquement pour gérer tes rendez-vous et commandes, te permettre de
+        <p><strong>Pourquoi ?</strong> Uniquement pour gérer tes rendez-vous, te permettre de
           les suivre dans ton compte, et te recontacter à ce sujet.</p>
         <p><strong>Qui les voit ?</strong> Seulement {CONFIG.nomBoutique}. Elles ne sont jamais vendues ni
           transmises à d'autres entreprises.</p>

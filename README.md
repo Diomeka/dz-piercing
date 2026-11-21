@@ -1,6 +1,6 @@
 # DZ PIERCING — Site / application web
 
-Site mobile pour **DZ PIERCING** : piercings, boutique de bracelets, prise de rendez-vous,
+Site mobile pour **DZ PIERCING** : piercings, braces de mode (pose sur rendez-vous), prise de rendez-vous,
 galerie, conseils de soins, contact, et un espace admin protégé par mot de passe.
 
 | Dossier | Contenu | Responsable |
@@ -32,8 +32,8 @@ galerie, conseils de soins, contact, et un espace admin protégé par mot de pas
     (seulement son empreinte) : la propriétaire l'a reçu en privé. Pour le changer :
     `npm run mot-de-passe-admin` dans le dossier `front-end`.
 - Dans l'admin : bouton **« Voir le site »** pour revenir au site, **« Déconnexion »** pour sortir.
-- Onglets : **RDV**, **Commandes** (accepter / refuser, prévenir le client sur WhatsApp),
-  **Piercings**, **Bracelets** (ajouter / modifier / supprimer avec photo, nom, prix), **Galerie**, et
+- Onglets : **RDV** (piercings et poses de braces : accepter / refuser, prévenir le client sur WhatsApp),
+  **Piercings**, **Braces** (ajouter / modifier / supprimer avec photo, nom, prix, couleurs), **Galerie**, et
   **Site** : tout ce qui se modifie **sans toucher au code** :
   page d'accueil (photo, phrase, points forts), menus (afficher / masquer / renommer), contact,
   horaires, réseaux sociaux, moyens de paiement (MonCash, NatCash, virement + logos), devise
@@ -41,8 +41,9 @@ galerie, conseils de soins, contact, et un espace admin protégé par mot de pas
 
 ### Comptes clients
 - Les clients peuvent **créer un compte** (nom, e-mail, téléphone, mot de passe) et se connecter.
-- Dans **« Mon compte »** ils voient **uniquement** leurs rendez-vous et leurs commandes, avec le statut.
-- On peut toujours réserver ou commander **sans compte**.
+- Dans **« Mon compte »** ils voient **uniquement** leurs rendez-vous (piercings et braces), avec le statut.
+- On peut toujours réserver **sans compte**.
+- Les braces se **posent au salon sur rendez-vous** : pas de commande en ligne.
 
 > ⚠️ **Mode démo** : tant que le backend n'est pas branché, les données sont enregistrées
 > **uniquement dans le navigateur** de l'appareil utilisé. Un rendez-vous pris sur le téléphone
@@ -89,7 +90,7 @@ pull request ; `deploy.yml` les relance avant de publier sur GitHub Pages (pas d
 un test échoue).
 
 **Tests** : `src/lib/format.test.js` (prix, dates, créneaux), `src/api/api.test.js` (mode démo :
-RDV, commandes, admin), `src/App.test.jsx` (chaque page s'affiche sans planter — `scrollTo` est
+RDV piercing et braces, comptes, admin), `src/App.test.jsx` (chaque page s'affiche sans planter — `scrollTo` est
 simulé comme dans les Chrome récents, qui renvoient une Promise).
 
 **Stack** : React 19, React Router 7 (HashRouter, pour fonctionner sur n'importe quel hébergement
@@ -103,7 +104,7 @@ front-end/src/
 ├── lib/                ← formatage, créneaux horaires, images d'attente
 ├── components/         ← Layout (nav), Modal, Toast, Icon, useData
 ├── lib/site.js         ← contenu modifiable depuis l'admin (onglet Site) + hook useSite()
-└── pages/              ← Accueil, Piercings, Bracelets, RendezVous, Galerie, Soins, Contact
+└── pages/              ← Accueil, Piercings, Braces, RendezVous, Galerie, Soins, Contact
     ├── compte/         ← Connexion (admin + client), Inscription, Mon compte
     └── admin/          ← interface admin SÉPARÉE : Demandes, Catalogue, GalerieAdmin, Reglages (Site)
 ```

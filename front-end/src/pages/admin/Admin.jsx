@@ -15,9 +15,8 @@ import Reglages from "./Reglages.jsx";
 
 const ONGLETS = [
   { id: "rdv", label: "RDV" },
-  { id: "commandes", label: "Commandes" },
   { id: "piercings", label: "Piercings" },
-  { id: "bracelets", label: "Bracelets" },
+  { id: "braces", label: "Braces" },
   { id: "galerie", label: "Galerie" },
   { id: "reglages", label: "Site" },
 ];
@@ -49,8 +48,7 @@ export default function Admin() {
   const compteurs = useData(async () => {
     if (!isAdmin) return {};
     const enAttente = (liste) => liste.filter((x) => x.statut === "pending").length;
-    const [rdv, commandes] = await Promise.all([api.rendezvous.list(), api.commandes.list()]);
-    return { rdv: enAttente(rdv), commandes: enAttente(commandes) };
+    return { rdv: enAttente(await api.rendezvous.list()) };
   }, [isAdmin, tick]);
   const nb = compteurs.data || {};
 
@@ -106,9 +104,8 @@ export default function Admin() {
           </div>
 
           {onglet === "rdv" && <Demandes key="rdv" type="rendezvous" tick={tick} onChange={actualiser} onError={surErreur} />}
-          {onglet === "commandes" && <Demandes key="cmd" type="commandes" tick={tick} onChange={actualiser} onError={surErreur} />}
           {onglet === "piercings" && <Catalogue key="p" type="piercings" onError={surErreur} />}
-          {onglet === "bracelets" && <Catalogue key="b" type="bracelets" onError={surErreur} />}
+          {onglet === "braces" && <Catalogue key="br" type="braces" onError={surErreur} />}
           {onglet === "galerie" && <GalerieAdmin onError={surErreur} />}
           {onglet === "reglages" && <Reglages onChange={actualiser} onError={surErreur} />}
         </ErrorBoundary>

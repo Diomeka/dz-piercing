@@ -55,7 +55,6 @@ Objet `user` (jamais de mot de passe dedans) :
 | Méthode | URL | Accès | Réponse |
 |---|---|---|---|
 | GET | `/moi/rendezvous` | client | uniquement les rendez-vous dont `clientId` = l'utilisateur connecté |
-| GET | `/moi/commandes` | client | uniquement ses commandes |
 
 ## Piercings — `/piercings`
 
@@ -79,15 +78,19 @@ Objet `user` (jamais de mot de passe dedans) :
 | PUT | `/piercings/{id}` | admin — renvoie l'objet modifié |
 | DELETE | `/piercings/{id}` | admin |
 
-## Bracelets — `/bracelets`
+## Braces — `/braces`
+
+Braces **de mode** (décoratifs), **posés au salon sur rendez-vous** : il n'y a **pas de commande
+en ligne**. Le client choisit un modèle et une couleur, puis réserve via `POST /rendezvous`.
 
 ```json
 {
   "id": 1,
-  "nom": "Chaîne Cubaine",
-  "prix": 29,
-  "couleurs": ["Doré", "Argent", "Noir"],   // tableau de textes (colonne JSON)
-  "disponible": true,                        // false = affiché "Épuisé", commande bloquée
+  "nom": "Braces élastiques couleur",
+  "prix": 45,
+  "duree": 45,                                         // durée de la pose en minutes, nullable
+  "couleurs": ["Noir", "Rouge", "Bleu", "Rose"],     // tableau de textes (colonne JSON) ; "Multicolore" possible
+  "disponible": true,                                   // false = affiché "Indisponible", réservation refusée
   "description": "…",
   "image": ""
 }
@@ -107,7 +110,7 @@ Mêmes routes que les piercings (`GET` public, `POST/PUT/DELETE` admin).
 |---|---|---|---|---|
 | POST | `/uploads` | admin | multipart, champ **`image`** (jpg/png/webp/heic, ≤ 15 Mo) | `{ "url": "https://…/photo.jpg" }` |
 
-L'URL renvoyée est ensuite placée dans le champ `image` d'un piercing/bracelet/photo.
+L'URL renvoyée est ensuite placée dans le champ `image` d'un piercing / modèle de braces / photo.
 Conseil : redimensionner à ~1200 px côté serveur (Intervention Image).
 
 ## Rendez-vous — `/rendezvous`
@@ -116,8 +119,10 @@ Conseil : redimensionner à ~1200 px côté serveur (Intervention Image).
 {
   "id": 1,
   "reference": "DZ-A7K2P",           // générée par le serveur
-  "piercingId": 2,
-  "piercingNom": "Hélix",            // copie du nom au moment de la réservation
+  "prestationType": "piercing",     // "piercing" | "braces"
+  "prestationId": 2,                // id dans /piercings ou /braces selon le type
+  "prestationNom": "Hélix",          // copie du nom au moment de la réservation (recalculée par le serveur)
+  "couleur": "",                     // braces : couleur choisie (doit faire partie de "couleurs"), sinon ""
   "date": "2026-12-02",              // AAAA-MM-JJ
   "heure": "14:30",                  // HH:MM
   "nom": "Sarah B.",
@@ -129,7 +134,7 @@ Conseil : redimensionner à ~1200 px côté serveur (Intervention Image).
 }
 ```
 
-`POST /rendezvous` et `POST /commandes` restent **publics** (on peut réserver sans compte).
+`POST /rendezvous` reste **public** (on peut réserver sans compte).
 Si un jeton **client** est envoyé, le serveur remplit `clientId` avec cet utilisateur (ne jamais le
 prendre dans le corps de la requête).
 
@@ -149,33 +154,6 @@ Validations serveur attendues (POST) :
   `{ "message": "Ce créneau vient d'être pris, choisis-en un autre." }`. Contrainte unique ou verrou transactionnel conseillé.
 - `telephone` : au moins 8 chiffres (Haïti : 8 chiffres, ex. 3712-3456 ; +509 accepté). Rate-limit anti-spam (ex. `throttle:10,1`).
 
-## Commandes — `/commandes`
-
-```json
-{
-  "id": 1,
-  "reference": "DZ-Q9M4T",
-  "braceletId": 1,
-  "braceletNom": "Chaîne Cubaine",   // calculé par le serveur
-  "couleur": "Doré",
-  "quantite": 2,
-  "prixUnitaire": 29,                // calculé par le serveur (ne jamais faire confiance au front)
-  "total": 58,                       // calculé par le serveur
-  "nom": "Yanis K.",
-  "telephone": "4855-6677",
-  "message": "",
-  "statut": "pending",
-  "creeLe": "2026-11-19T18:40:00Z"
-}
-```
-
-| Méthode | URL | Accès | Détails |
-|---|---|---|---|
-| POST | `/commandes` | **public** | corps : `braceletId, couleur, quantite (1–20), nom, telephone, message`. Refuser si bracelet indisponible ou couleur absente de `couleurs`. Répond l'objet complet (201). |
-| GET | `/commandes` | admin | |
-| PATCH | `/commandes/{id}` | admin | `{ "statut": "accepted" \| "refused" \| "pending" }` |
-| DELETE | `/commandes/{id}` | admin | |
-
 ## Réglages du site — `/reglages`
 
 Un seul objet (pas une liste) : tout ce que la propriétaire modifie dans l'onglet admin **« Site »**
@@ -189,7 +167,7 @@ sans toucher au code. Le front le lit au démarrage et l'applique partout.
     "photo": "https://…/accueil.jpg",                // URL renvoyée par /uploads (ou "hero.svg" = image par défaut)
     "atouts": [ { "titre": "Matériel stérile", "texte": "Usage unique" }, … ],   // 3 éléments
     "afficherPiercings": true,
-    "afficherBracelets": true
+    "afficherBraces": true
   },
   "contact": { "whatsapp": "3712-3456", "telephone": "+509 3712-3456", "adresse": "…", "emailContact": "…" },
   "horaires": { "0": null, "1": null, "2": ["10:00", "19:00"], …, "6": ["10:00", "20:00"] },  // 0 = dimanche
@@ -223,7 +201,7 @@ la vraie protection doit être faite par le serveur.
   les données de l'utilisateur connecté ; `clientId` toujours pris dans le jeton, jamais dans le corps.
 - **Jetons Sanctum** avec expiration (ex. 7 jours admin, 30 jours client) et révocation à la déconnexion
   (prévoir `POST /auth/logout`). Alternative plus sûre : cookies HttpOnly (Sanctum « SPA »).
-- **Rate-limit** : `/auth/*` (5/min), `POST /rendezvous` et `/commandes` (10/min).
+- **Rate-limit** : `/auth/*` (5/min), `POST /rendezvous` (10/min).
 - **Validation stricte** de chaque champ (types, longueurs, formats) ; prix et totaux recalculés côté
   serveur ; `devise` ∈ {USD, HTG} ; URL en `https://` uniquement.
 - **Upload** : vérifier le vrai type du fichier (`mimes:jpg,jpeg,png,webp`), taille max, renommer
@@ -236,7 +214,7 @@ la vraie protection doit être faite par le serveur.
 
 ## Idées pour la suite (optionnel)
 
-- Notification à la propriétaire à chaque nouveau RDV/commande (e-mail, ou WhatsApp Business API).
+- Notification à la propriétaire à chaque nouveau RDV (e-mail, ou WhatsApp Business API).
 - SMS de confirmation au client quand le RDV passe en `accepted`.
 - Mot de passe oublié par e-mail.
 
@@ -248,31 +226,26 @@ Route::post('/auth/login', [AuthController::class, 'login'])->middleware('thrott
 Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
 
 Route::get('/piercings', [PiercingController::class, 'index']);
-Route::get('/bracelets', [BraceletController::class, 'index']);
+Route::get('/braces',    [BracesController::class, 'index']);
 Route::get('/galerie',   [GaleriePhotoController::class, 'index']);
 Route::get('/reglages',  [ReglagesController::class, 'show']);
 Route::get('/rendezvous/creneaux-pris', [RendezVousController::class, 'creneauxPris']);
 Route::post('/rendezvous', [RendezVousController::class, 'store'])->middleware('throttle:10,1');
-Route::post('/commandes',  [CommandeController::class, 'store'])->middleware('throttle:10,1');
 
 // Client connecté : son espace
 Route::middleware('auth:sanctum')->prefix('moi')->group(function () {
     Route::get('/rendezvous', [MoiController::class, 'rendezvous']);
-    Route::get('/commandes',  [MoiController::class, 'commandes']);
 });
 
 // Admin seulement (middleware à créer : vérifie role === 'admin', sinon 403)
 Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::apiResource('piercings', PiercingController::class)->except(['index', 'show']);
-    Route::apiResource('bracelets', BraceletController::class)->except(['index', 'show']);
+    Route::apiResource('braces', BracesController::class)->except(['index', 'show']);
     Route::apiResource('galerie', GaleriePhotoController::class)->only(['store', 'update', 'destroy']);
     Route::post('/uploads', UploadController::class);
     Route::put('/reglages', [ReglagesController::class, 'update']);
     Route::get('/rendezvous', [RendezVousController::class, 'index']);
     Route::patch('/rendezvous/{rendezVous}', [RendezVousController::class, 'updateStatut']);
     Route::delete('/rendezvous/{rendezVous}', [RendezVousController::class, 'destroy']);
-    Route::get('/commandes', [CommandeController::class, 'index']);
-    Route::patch('/commandes/{commande}', [CommandeController::class, 'updateStatut']);
-    Route::delete('/commandes/{commande}', [CommandeController::class, 'destroy']);
 });
 ```

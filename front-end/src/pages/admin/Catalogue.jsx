@@ -6,12 +6,12 @@ import Icon from "../../components/Icon.jsx";
 import { useToast } from "../../components/Toast.jsx";
 import { formatPrix, imageDe, symboleDevise } from "../../lib/format.js";
 import { placeholder } from "../../lib/placeholder.js";
-import { Pastilles } from "../Bracelets.jsx";
+import { Pastilles } from "../Braces.jsx";
 import ImageUpload from "./ImageUpload.jsx";
 
 const VIDE = {
   piercings: { nom: "", categorie: "Oreille", prix: "", duree: 20, cicatrisation: "", description: "", image: "" },
-  bracelets: { nom: "", prix: "", couleurs: [], disponible: true, description: "", image: "" },
+  braces: { nom: "", prix: "", duree: 45, couleurs: [], disponible: true, description: "", image: "" },
 };
 const CATEGORIES = ["Oreille", "Visage", "Bouche", "Corps"];
 
@@ -31,8 +31,8 @@ function Formulaire({ type, initial, onClose, onSaved, onError }) {
     if (!(prix >= 0) || f.prix === "") return setErreur("Prix invalide.");
     const data = { ...f, nom: f.nom.trim(), description: f.description.trim(), prix };
     delete data.id;
-    if (type === "piercings") data.duree = Number(f.duree) || null;
-    if (type === "bracelets") data.couleurs = couleursTxt.split(",").map((c) => c.trim()).filter(Boolean);
+    data.duree = Number(f.duree) || null;
+    if (type === "braces") data.couleurs = couleursTxt.split(",").map((c) => c.trim()).filter(Boolean);
 
     setEnvoi(true);
     try {
@@ -48,13 +48,13 @@ function Formulaire({ type, initial, onClose, onSaved, onError }) {
     }
   }
 
-  const titre = `${initial?.id ? "Modifier" : "Ajouter"} ${type === "piercings" ? "un piercing" : "un bracelet"}`;
+  const titre = `${initial?.id ? "Modifier" : "Ajouter"} ${type === "piercings" ? "un piercing" : "un modèle de braces"}`;
   return (
     <Modal title={titre} onClose={onClose}>
       <form className="form" onSubmit={valider}>
         <ImageUpload value={f.image} onChange={(image) => setF((x) => ({ ...x, image }))}
-          apercu={placeholder(f.nom || "Photo", type === "bracelets" ? "bracelet" : "piercing")} />
-        <label className="field">Nom<input value={f.nom} onChange={set("nom")} placeholder={type === "piercings" ? "Ex : Hélix" : "Ex : Chaîne cubaine"} /></label>
+          apercu={placeholder(f.nom || "Photo", type === "braces" ? "braces" : "piercing")} />
+        <label className="field">Nom<input value={f.nom} onChange={set("nom")} placeholder={type === "piercings" ? "Ex : Hélix" : "Ex : Braces élastiques couleur"} /></label>
         <div className="row-2">
           <label className="field">Prix ({symboleDevise()})<input value={f.prix} onChange={set("prix")} inputMode="decimal" placeholder="35" /></label>
           {type === "piercings" ? (
@@ -65,7 +65,7 @@ function Formulaire({ type, initial, onClose, onSaved, onError }) {
             </label>
           ) : (
             <label className="field check">
-              <input type="checkbox" checked={!!f.disponible} onChange={set("disponible")} /> En stock
+              <input type="checkbox" checked={!!f.disponible} onChange={set("disponible")} /> Disponible
             </label>
           )}
         </div>
@@ -76,9 +76,12 @@ function Formulaire({ type, initial, onClose, onSaved, onError }) {
             <label className="field">Cicatrisation<input value={f.cicatrisation} onChange={set("cicatrisation")} placeholder="3 à 6 mois" /></label>
           </div>
         )}
-        {type === "bracelets" && (
-          <label className="field">Couleurs (séparées par des virgules)
-            <input value={couleursTxt} onChange={(e) => setCouleursTxt(e.target.value)} placeholder="Doré, Argent, Noir" />
+        {type === "braces" && (
+          <label className="field">Durée de la pose (min)<input value={f.duree ?? ""} onChange={set("duree")} inputMode="numeric" /></label>
+        )}
+        {type === "braces" && (
+          <label className="field">Couleurs proposées (séparées par des virgules)
+            <input value={couleursTxt} onChange={(e) => setCouleursTxt(e.target.value)} placeholder="Argent, Rose, Bleu, Multicolore" />
             <Pastilles couleurs={couleursTxt.split(",").map((c) => c.trim()).filter(Boolean)} />
           </label>
         )}
@@ -113,18 +116,18 @@ export default function Catalogue({ type, onError }) {
   return (
     <>
       <button className="btn btn-gold btn-block btn-lg" onClick={() => setEdition({})}>
-        <Icon name="plus" /> Ajouter {type === "piercings" ? "un piercing" : "un bracelet"}
+        <Icon name="plus" /> Ajouter {type === "piercings" ? "un piercing" : "un modèle de braces"}
       </button>
 
       <div className="list">
         {data.map((item) => (
           <article key={item.id} className="card admin-item">
-            <img src={imageDe(item, type === "bracelets" ? "bracelet" : "piercing")} alt="" />
+            <img src={imageDe(item, type === "braces" ? "braces" : "piercing")} alt="" />
             <div className="admin-item-body">
               <strong>{item.nom}</strong>
               <span className="price">{formatPrix(item.prix)}</span>
               <small className="muted">
-                {type === "piercings" ? item.categorie : (item.disponible ? "En stock" : "Épuisé")}
+                {type === "piercings" ? item.categorie : (item.disponible ? "Disponible" : "Indisponible")}
               </small>
             </div>
             <div className="admin-item-actions">

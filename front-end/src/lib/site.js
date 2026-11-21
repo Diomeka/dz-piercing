@@ -11,7 +11,7 @@ import { setDevise } from "./format.js";
 /** Pages qui peuvent apparaître dans les menus (l'Accueil est toujours visible). */
 export const PAGES_MENU = [
   { id: "piercings", to: "/piercings", label: "Piercings", icon: "needle", principal: true },
-  { id: "bracelets", to: "/bracelets", label: "Bracelets", icon: "bag", principal: true },
+  { id: "braces", to: "/braces", label: "Braces", icon: "smile", principal: true },
   { id: "rendez-vous", to: "/rendez-vous", label: "RDV", icon: "calendar", principal: true },
   { id: "galerie", to: "/galerie", label: "Galerie", icon: "image" },
   { id: "soins", to: "/soins", label: "Soins après piercing", icon: "heart" },
@@ -46,7 +46,7 @@ export function defauts() {
         { titre: "Conseils offerts", texte: "Suivi des soins" },
       ],
       afficherPiercings: true,
-      afficherBracelets: true,
+      afficherBraces: true,
     },
     contact: {
       whatsapp: CONFIG.whatsapp,

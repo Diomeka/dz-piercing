@@ -28,7 +28,7 @@ export function rendezVousIcs(rdv, dureeMinutes = CONFIG.dureeCreneau) {
     `DTSTAMP:${utc}`,
     `DTSTART:${stamp(debut)}`,
     `DTEND:${stamp(fin)}`,
-    `SUMMARY:${txt(`Piercing ${rdv.piercingNom} — ${CONFIG.nomBoutique}`)}`,
+    `SUMMARY:${txt(`${rdv.prestationType === "braces" ? rdv.prestationNom : `Piercing ${rdv.prestationNom}`} — ${CONFIG.nomBoutique}`)}`,
     `LOCATION:${txt(getSite().contact.adresse)}`,
     `DESCRIPTION:${txt(`Référence ${rdv.reference}. En attente de confirmation par ${CONFIG.nomBoutique}.\nContact : ${getSite().contact.telephone}`)}`,
     "BEGIN:VALARM",

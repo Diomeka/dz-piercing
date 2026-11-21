@@ -247,13 +247,12 @@ const demoApi = {
     setSession({ token: `demo:${u.id}`, user });
     return user;
   },
-  /** Espace client : uniquement SES rendez-vous et SES commandes. */
+  /** Espace client : uniquement SES rendez-vous. */
   moi: {
     rendezvous: async () => { requireClient(); return wait(loadDb().rendezvous.filter((r) => r.clientId === getUser().id)); },
-    commandes: async () => { requireClient(); return wait(loadDb().commandes.filter((c) => c.clientId === getUser().id)); },
   },
   piercings: crud("piercings", "p"),
-  bracelets: crud("bracelets", "b"),
+  braces: crud("braces", "br"),
   galerie: crud("galerie", "g"),
   rendezvous: {
     ...statusApi("rendezvous"),
@@ -265,27 +264,18 @@ const demoApi = {
       if (db.rendezvous.some((r) => r.date === data.date && r.heure === data.heure && r.statut !== "refused")) {
         throw new Error("Ce créneau vient d'être pris, choisis-en un autre.");
       }
+      // Prestation : un piercing OU des braces (pose au salon). Le nom est repris de la base.
+      const type = data.prestationType === "braces" ? "braces" : "piercing";
+      const p = (type === "braces" ? db.braces : db.piercings).find((x) => x.id === data.prestationId);
+      if (!p) throw new Error("Prestation introuvable, choisis-en une autre.");
+      if (type === "braces" && p.disponible === false) throw new Error("Ce modèle de braces n'est pas disponible pour le moment.");
+      if (type === "braces" && p.couleurs?.length && !p.couleurs.includes(data.couleur)) throw new Error("Choisis une couleur.");
       const item = {
-        ...data, id: newId("r"), reference: newRef(), statut: "pending", creeLe: new Date().toISOString(),
+        ...data, prestationType: type, prestationNom: p.nom, couleur: type === "braces" ? data.couleur || "" : "",
+        id: newId("r"), reference: newRef(), statut: "pending", creeLe: new Date().toISOString(),
         clientId: isClient() ? getUser().id : null, // relié au compte si le client est connecté
       };
       db.rendezvous.unshift(item);
-      saveDb(db);
-      return wait(item);
-    },
-  },
-  commandes: {
-    ...statusApi("commandes"),
-    create: async (data) => {
-      const db = loadDb();
-      const b = db.bracelets.find((x) => x.id === data.braceletId);
-      if (!b) throw new Error("Bracelet introuvable.");
-      const item = {
-        ...data, id: newId("c"), reference: newRef(), braceletNom: b.nom, prixUnitaire: b.prix,
-        total: b.prix * data.quantite, statut: "pending", creeLe: new Date().toISOString(),
-        clientId: isClient() ? getUser().id : null,
-      };
-      db.commandes.unshift(item);
       saveDb(db);
       return wait(item);
     },
@@ -362,16 +352,14 @@ const restApi = {
   },
   moi: {
     rendezvous: () => http("GET", "/moi/rendezvous"),
-    commandes: () => http("GET", "/moi/commandes"),
   },
   piercings: restCrud("/piercings"),
-  bracelets: restCrud("/bracelets"),
+  braces: restCrud("/braces"),
   galerie: restCrud("/galerie"),
   rendezvous: {
     ...restStatus("/rendezvous"),
     booked: (date) => http("GET", `/rendezvous/creneaux-pris?date=${encodeURIComponent(date)}`),
   },
-  commandes: restStatus("/commandes"),
   reglages: {
     get: () => http("GET", "/reglages"),
     update: (data) => http("PUT", "/reglages", data),

@@ -6,7 +6,7 @@ import { ADMIN_TEST } from "../test/identifiants.js";
 const ADMIN = ADMIN_TEST.email;
 const MDP = ADMIN_TEST.motDePasse;
 
-const RDV = { piercingId: "p1", piercingNom: "Lobe", date: "2027-01-05", heure: "11:00", nom: "Test", telephone: "0612345678", message: "" };
+const RDV = { prestationType: "piercing", prestationId: "p1", prestationNom: "Lobe", date: "2027-01-05", heure: "11:00", nom: "Test", telephone: "3712-3456", message: "" };
 
 describe("API — mode démo", () => {
   it("est en mode démo sans apiUrl", () => {
@@ -15,7 +15,7 @@ describe("API — mode démo", () => {
 
   it("charge les données d'exemple", async () => {
     expect((await api.piercings.list()).length).toBeGreaterThan(5);
-    expect((await api.bracelets.list()).length).toBeGreaterThan(3);
+    expect((await api.braces.list()).length).toBeGreaterThan(3);
     expect((await api.galerie.list()).length).toBeGreaterThan(3);
   });
 
@@ -27,10 +27,20 @@ describe("API — mode démo", () => {
     await expect(api.rendezvous.create(RDV)).rejects.toThrow(/créneau/);
   });
 
-  it("calcule le total d'une commande à partir du prix réel", async () => {
-    const c = await api.commandes.create({ braceletId: "b1", couleur: "Doré", quantite: 3, nom: "T", telephone: "0612345678", prixUnitaire: 1 });
-    expect(c.prixUnitaire).toBe(29);
-    expect(c.total).toBe(87);
+  it("réserve la pose de braces avec la couleur choisie (nom repris de la base)", async () => {
+    const r = await api.rendezvous.create({ ...RDV, prestationType: "braces", prestationId: "br2", prestationNom: "faux nom", couleur: "Rose", heure: "15:00" });
+    expect(r).toMatchObject({ prestationType: "braces", prestationNom: "Braces élastiques couleur", couleur: "Rose" });
+    // couleur obligatoire quand le modèle en propose plusieurs
+    await expect(api.rendezvous.create({ ...RDV, prestationType: "braces", prestationId: "br2", heure: "15:30" })).rejects.toThrow(/couleur/);
+    // un modèle indisponible ne se réserve pas
+    await expect(api.rendezvous.create({ ...RDV, prestationType: "braces", prestationId: "br6", couleur: "Noir", heure: "16:00" })).rejects.toThrow(/disponible/);
+    // prestation inconnue
+    await expect(api.rendezvous.create({ ...RDV, prestationId: "inconnu", heure: "16:30" })).rejects.toThrow(/introuvable/);
+  });
+
+  it("il n'y a plus de commandes en ligne (tout passe par rendez-vous)", () => {
+    expect(api.commandes).toBeUndefined();
+    expect(api.bracelets).toBeUndefined();
   });
 
   it("protège l'admin par mot de passe", async () => {

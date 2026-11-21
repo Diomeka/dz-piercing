@@ -39,8 +39,9 @@ afterEach(() => {
 const PAGES = {
   "": "Prendre rendez-vous",
   piercings: "Hélix",
-  bracelets: "Chaîne Cubaine",
-  "rendez-vous": "Ton piercing",
+  braces: "Réserver la pose",
+  bracelets: "Braces élastiques couleur",  // ancienne adresse → redirigée vers /braces
+  "rendez-vous": "Ta prestation",
   galerie: "Galerie",
   soins: "Soins après piercing",
   contact: "WhatsApp",

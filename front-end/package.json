@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Front-end React du site DZ PIERCING (piercings, bracelets, rendez-vous, admin).",
+  "description": "Front-end React du site DZ PIERCING (piercings, braces, rendez-vous, admin).",
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",

@@ -6,7 +6,7 @@ import Icon from "../../components/Icon.jsx";
 import { lienWhatsApp } from "../../lib/format.js";
 
 /** Pages où l'on peut revenir après connexion (liste fermée : pas de redirection vers un autre site) */
-const RETOURS_OK = ["/compte", "/rendez-vous", "/bracelets", "/piercings"];
+const RETOURS_OK = ["/compte", "/rendez-vous", "/braces", "/piercings"];
 
 /** Destination après connexion : l'admin va dans l'admin, le client dans son compte. */
 export const destination = (user, retour) =>
@@ -44,7 +44,7 @@ export default function Connexion() {
       <form className="card form auth" onSubmit={valider} noValidate>
         <div className="success-icon"><Icon name="user" size={32} /></div>
         <h1 className="page-title center">Connexion</h1>
-        <p className="muted center">Retrouve tes rendez-vous et tes commandes.</p>
+        <p className="muted center">Retrouve tes rendez-vous (piercings et braces).</p>
 
         <label className="field">E-mail
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" inputMode="email" placeholder="ton@email.com" />

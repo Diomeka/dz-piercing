@@ -101,6 +101,7 @@ export const STATUTS = {
 export const COULEURS = {
   "doré": "#d4af37", "or": "#d4af37", "argent": "#c9c9c9", "noir": "#111111", "blanc": "#ffffff",
   "or rose": "#c98f86", "rose": "#e7a1b0", "rouge": "#c0392b", "bleu": "#2e5fb8", "vert": "#2f8f5b",
+  "multicolore": "conic-gradient(#e53935, #fb8c00, #fdd835, #43a047, #1e88e5, #8e24aa, #e53935)",
   "marron": "#7a4b2a", "violet": "#7b4bb3", "beige": "#d9c4a3", "gris": "#777777",
 };
 export const couleurHex = (nom) => COULEURS[String(nom).trim().toLowerCase()] || "#555555";

@@ -8,7 +8,7 @@ import { useSite } from "../lib/site.js";
 
 export default function Accueil() {
   const piercings = useData(() => api.piercings.list());
-  const bracelets = useData(() => api.bracelets.list());
+  const braces = useData(() => api.braces.list());
   const site = useSite(); // contenu modifiable dans l'admin (onglet Site)
   const menu = (id) => site.menus[id]?.visible !== false;
   const atouts = (site.accueil.atouts || []).filter((a) => a.titre?.trim());
@@ -47,9 +47,9 @@ export default function Accueil() {
                 <Icon name="calendar" /> Prendre rendez-vous
               </Link>
             )}
-            {menu("bracelets") && (
-              <Link to="/bracelets" className="btn btn-outline btn-lg">
-                <Icon name="bag" /> Voir les bracelets
+            {menu("braces") && (
+              <Link to="/braces" className="btn btn-outline btn-lg">
+                <Icon name="smile" /> Voir les braces
               </Link>
             )}
           </div>
@@ -81,15 +81,15 @@ export default function Accueil() {
         </div>
       </section>}
 
-      {site.accueil.afficherBracelets && menu("bracelets") && <section className="container section">
+      {site.accueil.afficherBraces && menu("braces") && <section className="container section">
         <div className="section-head">
-          <h2 className="title">La boutique bracelets</h2>
-          <Link to="/bracelets" className="link-gold">Tout voir →</Link>
+          <h2 className="title">Nos braces</h2>
+          <Link to="/braces" className="link-gold">Tout voir →</Link>
         </div>
         <div className="scroller">
-          {(bracelets.data || []).filter((b) => b.disponible).slice(0, 6).map((b) => (
-            <Link key={b.id} to="/bracelets" className="mini-card">
-              <img src={imageDe(b, "bracelet")} alt={b.nom} loading="lazy" />
+          {(braces.data || []).filter((b) => b.disponible).slice(0, 6).map((b) => (
+            <Link key={b.id} to={`/rendez-vous?braces=${encodeURIComponent(b.id)}`} className="mini-card">
+              <img src={imageDe(b, "braces")} alt={b.nom} loading="lazy" />
               <div><strong>{b.nom}</strong><span className="price">{formatPrix(b.prix)}</span></div>
             </Link>
           ))}
