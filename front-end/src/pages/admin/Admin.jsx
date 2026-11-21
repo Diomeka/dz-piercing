@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import api, { isLoggedIn, logout } from "../../api/index.js";
+import useData from "../../components/useData.jsx";
 import Icon from "../../components/Icon.jsx";
 import { useToast } from "../../components/Toast.jsx";
 import Demandes from "./Demandes.jsx";
@@ -56,6 +57,24 @@ export default function Admin() {
   const [params, setParams] = useSearchParams();
   const onglet = ONGLETS.some((o) => o.id === params.get("onglet")) ? params.get("onglet") : "rdv";
 
+  // "tick" : chaque incrément recharge les demandes et les compteurs
+  // (bouton Actualiser, après une action, et automatiquement toutes les minutes)
+  const [tick, setTick] = useState(0);
+  const actualiser = () => setTick((t) => t + 1);
+  useEffect(() => {
+    if (!connecte) return;
+    const minuteur = setInterval(actualiser, 60_000);
+    return () => clearInterval(minuteur);
+  }, [connecte]);
+
+  const compteurs = useData(async () => {
+    if (!connecte) return {};
+    const enAttente = (liste) => liste.filter((x) => x.statut === "pending").length;
+    const [rdv, commandes] = await Promise.all([api.rendezvous.list(), api.commandes.list()]);
+    return { rdv: enAttente(rdv), commandes: enAttente(commandes) };
+  }, [connecte, tick]);
+  const nb = compteurs.data || {};
+
   if (!connecte) return <Connexion onOk={() => setConnecte(true)} />;
 
   const deconnexion = () => { logout(); setConnecte(false); toast("Déconnecté"); };
@@ -69,7 +88,10 @@ export default function Admin() {
     <div className="container page admin">
       <div className="admin-head">
         <h1 className="page-title">Admin</h1>
-        <button className="btn btn-outline btn-sm" onClick={deconnexion}>Déconnexion</button>
+        <div className="admin-head-actions">
+          <button className="btn btn-outline btn-sm" onClick={() => { actualiser(); toast("Actualisé ✔"); }}>↻ Actualiser</button>
+          <button className="btn btn-outline btn-sm" onClick={deconnexion}>Déconnexion</button>
+        </div>
       </div>
       {api.mode === "demo" && (
         <p className="notice small">
@@ -88,12 +110,13 @@ export default function Admin() {
           <button key={o.id} role="tab" aria-selected={onglet === o.id}
             className={`tab ${onglet === o.id ? "active" : ""}`} onClick={() => setParams({ onglet: o.id })}>
             {o.label}
+            {nb[o.id] > 0 && <span className="tab-count" aria-label={`${nb[o.id]} en attente`}>{nb[o.id]}</span>}
           </button>
         ))}
       </div>
 
-      {onglet === "rdv" && <Demandes key="rdv" type="rendezvous" onError={surErreur} />}
-      {onglet === "commandes" && <Demandes key="cmd" type="commandes" onError={surErreur} />}
+      {onglet === "rdv" && <Demandes key="rdv" type="rendezvous" tick={tick} onChange={actualiser} onError={surErreur} />}
+      {onglet === "commandes" && <Demandes key="cmd" type="commandes" tick={tick} onChange={actualiser} onError={surErreur} />}
       {onglet === "piercings" && <Catalogue key="p" type="piercings" onError={surErreur} />}
       {onglet === "bracelets" && <Catalogue key="b" type="bracelets" onError={surErreur} />}
       {onglet === "galerie" && <GalerieAdmin onError={surErreur} />}

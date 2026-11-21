@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import CONFIG from "../config.js";
 import Icon from "./Icon.jsx";
@@ -25,8 +25,26 @@ export function Logo({ size = "md" }) {
   );
 }
 
+const TITRES = {
+  "/": null,
+  "/piercings": "Piercings",
+  "/bracelets": "Bracelets",
+  "/rendez-vous": "Prendre rendez-vous",
+  "/galerie": "Galerie",
+  "/soins": "Soins après piercing",
+  "/contact": "Contact",
+  "/confidentialite": "Mentions légales",
+  "/admin": "Admin",
+};
+
 export default function Layout() {
   const { pathname } = useLocation();
+
+  // Titre de l'onglet du navigateur (et de l'historique) selon la page
+  useEffect(() => {
+    const t = pathname in TITRES ? TITRES[pathname] : "Page introuvable";
+    document.title = t ? `${t} — ${CONFIG.nomBoutique}` : `${CONFIG.nomBoutique} — Piercings & bracelets`;
+  }, [pathname]);
   // On retient sur quelle page le menu a été ouvert : il se ferme tout seul en changeant de page
   const [menuOuvertSur, setMenuOuvertSur] = useState(null);
   const menuOuvert = menuOuvertSur === pathname;

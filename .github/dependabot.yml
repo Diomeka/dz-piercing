@@ -1,0 +1,18 @@
+# GitHub propose chaque mois des mises à jour (sécurité incluse) sous forme de
+# pull requests. La CI (ci.yml) les vérifie automatiquement avant fusion.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /front-end
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    groups:
+      outils-de-dev:
+        dependency-type: development
+      react:
+        patterns: ["react", "react-dom", "react-router*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

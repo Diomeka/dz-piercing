@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
 import Accueil from "./pages/Accueil.jsx";
@@ -8,7 +8,10 @@ import RendezVous from "./pages/RendezVous.jsx";
 import Galerie from "./pages/Galerie.jsx";
 import Soins from "./pages/Soins.jsx";
 import Contact from "./pages/Contact.jsx";
-import Admin from "./pages/admin/Admin.jsx";
+import { Chargement } from "./components/useData.jsx";
+
+// L'admin n'est téléchargé que si on l'ouvre : le site reste léger pour les clients
+const Admin = lazy(() => import("./pages/admin/Admin.jsx"));
 import NotFound from "./pages/NotFound.jsx";
 import Confidentialite from "./pages/Confidentialite.jsx";
 
@@ -29,7 +32,7 @@ export default function App() {
         <Route path="soins" element={<Soins />} />
         <Route path="contact" element={<Contact />} />
         <Route path="confidentialite" element={<Confidentialite />} />
-        <Route path="admin" element={<Admin />} />
+        <Route path="admin" element={<Suspense fallback={<Chargement />}><Admin /></Suspense>} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

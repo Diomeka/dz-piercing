@@ -31,9 +31,9 @@ function messageClient(type, item, statut) {
     : `Bonjour ${item.nom}, c'est DZ PIERCING. Désolé, ta commande ${item.braceletNom} ne peut pas être honorée pour le moment. (Réf. ${item.reference})`;
 }
 
-export default function Demandes({ type, onError }) {
+export default function Demandes({ type, tick = 0, onChange, onError }) {
   const toast = useToast();
-  const { data, loading, error, reload } = useData(() => api[type].list(), [type]);
+  const { data, loading, error, reload } = useData(() => api[type].list(), [type, tick]);
   const [filtre, setFiltre] = useState("pending");
   const [occupe, setOccupe] = useState(null);
 
@@ -49,7 +49,7 @@ export default function Demandes({ type, onError }) {
     try {
       await api[type].setStatus(item.id, statut);
       toast(statut === "accepted" ? "Accepté ✔" : "Refusé");
-      reload();
+      onChange ? onChange() : reload();
     } catch (err) {
       onError(err);
     } finally {
@@ -62,7 +62,7 @@ export default function Demandes({ type, onError }) {
     try {
       await api[type].remove(item.id);
       toast("Supprimé");
-      reload();
+      onChange ? onChange() : reload();
     } catch (err) {
       onError(err);
     }
