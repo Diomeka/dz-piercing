@@ -211,6 +211,29 @@ URL (`reseaux`, `photo`, `logo`). Les **horaires** servent aussi à valider les 
 Les montants (`prix`, `total`, `prixUnitaire`) restent de simples nombres : **aucune conversion**
 n'est faite quand la devise change (la propriétaire ressaisit ses prix).
 
+## Sécurité attendue côté serveur (indispensable)
+
+Le front applique déjà ses protections (CSP, filtrage des liens/images, blocage après 5 essais,
+aucun mot de passe dans le code). Mais **tout ce qui est dans le navigateur peut être contourné** :
+la vraie protection doit être faite par le serveur.
+
+- **Mots de passe** : `Hash::make` (bcrypt/argon2), jamais renvoyés ni journalisés. Compte admin
+  créé par seeder avec un mot de passe fort fourni par variable d'environnement (`.env`, jamais commité).
+- **Rôles** : middleware `admin` sur toutes les routes admin (403 sinon) ; `/moi/*` ne renvoie que
+  les données de l'utilisateur connecté ; `clientId` toujours pris dans le jeton, jamais dans le corps.
+- **Jetons Sanctum** avec expiration (ex. 7 jours admin, 30 jours client) et révocation à la déconnexion
+  (prévoir `POST /auth/logout`). Alternative plus sûre : cookies HttpOnly (Sanctum « SPA »).
+- **Rate-limit** : `/auth/*` (5/min), `POST /rendezvous` et `/commandes` (10/min).
+- **Validation stricte** de chaque champ (types, longueurs, formats) ; prix et totaux recalculés côté
+  serveur ; `devise` ∈ {USD, HTG} ; URL en `https://` uniquement.
+- **Upload** : vérifier le vrai type du fichier (`mimes:jpg,jpeg,png,webp`), taille max, renommer
+  le fichier (nom aléatoire), le stocker hors du code, refuser le SVG.
+- **CORS** limité à l'adresse du site (pas `*`), **HTTPS** obligatoire, `APP_DEBUG=false` en production.
+- **En-têtes HTTP** : `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
+  `Referrer-Policy: strict-origin-when-cross-origin`, `Strict-Transport-Security`.
+- **Base de données** : requêtes via Eloquent / paramètres liés (pas de SQL concaténé), sauvegardes.
+- Ne jamais commiter `.env`, clés ou mots de passe (le `.gitignore` du front les exclut déjà).
+
 ## Idées pour la suite (optionnel)
 
 - Notification à la propriétaire à chaque nouveau RDV/commande (e-mail, ou WhatsApp Business API).

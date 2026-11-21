@@ -3,7 +3,7 @@ import api from "../api/index.js";
 import useData from "../components/useData.jsx";
 import { Logo } from "../components/Layout.jsx";
 import Icon from "../components/Icon.jsx";
-import { formatPrix, imageDe } from "../lib/format.js";
+import { formatPrix, imageDe, imageSure } from "../lib/format.js";
 import { useSite } from "../lib/site.js";
 
 export default function Accueil() {
@@ -15,7 +15,7 @@ export default function Accueil() {
 
   return (
     <>
-      <section className="hero" style={{ backgroundImage: `url(${site.accueil.photo || "hero.svg"})` }}>
+      <section className="hero" style={{ backgroundImage: `url("${imageSure(site.accueil.photo) || "hero.svg"}")` }}>
         <div className="hero-overlay" />
         <div className="container hero-content">
           <div className="hero-mark">

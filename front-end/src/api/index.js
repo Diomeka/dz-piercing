@@ -11,6 +11,7 @@
    ========================================================================= */
 import CONFIG from "../config.js";
 import SEED from "../data/seed.js";
+import { egal, empreinteMotDePasse, nouveauSel } from "../lib/motdepasse.js";
 
 const DB_KEY = "dz_piercing_db_v1";
 const SESSION_KEY = "dz_session";
@@ -82,23 +83,38 @@ function loadDb() {
   return db;
 }
 
-/** Empreinte du mot de passe — MODE DÉMO SEULEMENT (le vrai serveur utilise bcrypt).
- *  Volontairement simple : crypto.subtle n'existe pas en http:// (test sur le Wi-Fi). */
-function empreinte(motDePasse) {
-  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
-  const s = "dz-piercing:" + motDePasse;
-  for (let i = 0; i < s.length; i++) {
-    const c = s.charCodeAt(i);
-    h1 = Math.imul(h1 ^ c, 2654435761);
-    h2 = Math.imul(h2 ^ c, 1597334677);
-  }
-  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-  return (h2 >>> 0).toString(16).padStart(8, "0") + (h1 >>> 0).toString(16).padStart(8, "0");
-}
-const sansMotDePasse = ({ mdp: _mdp, ...u }) => u;
+/* --- Mots de passe (MODE DÉMO) : uniquement des empreintes salées, jamais le mot de passe --- */
+const sansMotDePasse = ({ mdp: _mdp, sel: _sel, ...u }) => u;
 const normEmail = (e) => String(e || "").trim().toLowerCase();
 const EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+/** Mot de passe acceptable : 8 caractères minimum, avec au moins une lettre et un chiffre. */
+export function motDePasseValide(m) {
+  const s = String(m || "");
+  return s.length >= 8 && /[A-Za-zÀ-ÿ]/.test(s) && /\d/.test(s);
+}
+
+/* --- Anti « devinette » : après 5 erreurs, connexion bloquée 1 minute --- */
+const ESSAIS_KEY = "dz_essais";
+const MAX_ESSAIS = 5;
+const BLOCAGE_MS = 60_000;
+function verifierBlocage() {
+  let e;
+  try { e = JSON.parse(storage.get(ESSAIS_KEY) || "null"); } catch { e = null; }
+  if (e && e.jusqua > Date.now()) {
+    const s = Math.ceil((e.jusqua - Date.now()) / 1000);
+    throw new Error(`Trop d'essais. Réessaie dans ${s} seconde${s > 1 ? "s" : ""}.`);
+  }
+}
+function noterEchec() {
+  let e;
+  try { e = JSON.parse(storage.get(ESSAIS_KEY) || "null") || { n: 0 }; } catch { e = { n: 0 }; }
+  e.n = (e.jusqua && e.jusqua <= Date.now() ? 0 : e.n) + 1;
+  e.jusqua = e.n >= MAX_ESSAIS ? Date.now() + BLOCAGE_MS : 0;
+  if (e.n >= MAX_ESSAIS) e.n = 0;
+  storage.set(ESSAIS_KEY, JSON.stringify(e));
+}
+const oublierEchecs = () => storage.remove(ESSAIS_KEY);
 const saveDb = (db) => storage.set(DB_KEY, JSON.stringify(db));
 const wait = (v) => new Promise((r) => setTimeout(() => r(structuredClone(v)), 120));
 const newId = (p) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -189,14 +205,22 @@ const demoApi = {
   /** Connexion unique (admin OU client). Renvoie l'utilisateur ({ role, … }). */
   login: async (email, motDePasse) => {
     await wait(null);
+    verifierBlocage();
     const e = normEmail(email);
-    if (e === normEmail(CONFIG.emailAdminDemo) && motDePasse === CONFIG.motDePasseDemo) {
+    const mdp = String(motDePasse || "");
+    const admin = CONFIG.adminDemo || {};
+    if (e === normEmail(admin.email) && admin.sel && egal(empreinteMotDePasse(mdp, admin.sel), admin.empreinte)) {
+      oublierEchecs();
       const user = { id: "admin", nom: "Admin", email: e, role: "admin" };
       setSession({ token: "demo:admin", user });
       return user;
     }
     const u = loadDb().utilisateurs.find((x) => x.email === e);
-    if (!u || u.mdp !== empreinte(motDePasse)) throw new Error("E-mail ou mot de passe incorrect.");
+    if (!u || !u.sel || !egal(empreinteMotDePasse(mdp, u.sel), u.mdp)) {
+      noterEchec();
+      throw new Error("E-mail ou mot de passe incorrect.");
+    }
+    oublierEchecs();
     const user = sansMotDePasse(u);
     setSession({ token: `demo:${u.id}`, user });
     return user;
@@ -207,12 +231,16 @@ const demoApi = {
     const e = normEmail(email);
     if (!String(nom || "").trim()) throw new Error("Écris ton nom.");
     if (!EMAIL_OK.test(e)) throw new Error("Adresse e-mail invalide.");
-    if (String(motDePasse || "").length < 8) throw new Error("Le mot de passe doit faire au moins 8 caractères.");
+    if (!motDePasseValide(motDePasse)) throw new Error("Mot de passe trop faible : 8 caractères minimum, avec des lettres et des chiffres.");
     const db = loadDb();
-    if (e === normEmail(CONFIG.emailAdminDemo) || db.utilisateurs.some((x) => x.email === e)) {
+    if (e === normEmail(CONFIG.adminDemo?.email) || db.utilisateurs.some((x) => x.email === e)) {
       throw new Error("Un compte existe déjà avec cet e-mail. Connecte-toi.");
     }
-    const u = { id: newId("u"), nom: nom.trim(), email: e, telephone: String(telephone || "").trim(), role: "client", mdp: empreinte(motDePasse), creeLe: new Date().toISOString() };
+    const sel = nouveauSel();
+    const u = {
+      id: newId("u"), nom: String(nom).trim().slice(0, 80), email: e, telephone: String(telephone || "").trim().slice(0, 30),
+      role: "client", sel, mdp: empreinteMotDePasse(String(motDePasse), sel), creeLe: new Date().toISOString(),
+    };
     db.utilisateurs.push(u);
     saveDb(db);
     const user = sansMotDePasse(u);

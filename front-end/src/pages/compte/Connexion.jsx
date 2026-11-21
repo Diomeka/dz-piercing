@@ -3,12 +3,14 @@ import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import api from "../../api/index.js";
 import useSession from "../../components/useSession.js";
 import Icon from "../../components/Icon.jsx";
-import CONFIG from "../../config.js";
 import { lienWhatsApp } from "../../lib/format.js";
+
+/** Pages où l'on peut revenir après connexion (liste fermée : pas de redirection vers un autre site) */
+const RETOURS_OK = ["/compte", "/rendez-vous", "/bracelets", "/piercings"];
 
 /** Destination après connexion : l'admin va dans l'admin, le client dans son compte. */
 export const destination = (user, retour) =>
-  user?.role === "admin" ? "/admin" : retour && retour.startsWith("/") && !retour.startsWith("/admin") ? retour : "/compte";
+  user?.role === "admin" ? "/admin" : RETOURS_OK.includes(retour) ? retour : "/compte";
 
 export default function Connexion() {
   const navigate = useNavigate();
@@ -65,9 +67,6 @@ export default function Connexion() {
             Mot de passe oublié ?
           </a>
         </p>
-        {api.mode === "demo" && (
-          <p className="muted small center">Mode démo — admin : {CONFIG.emailAdminDemo} (mot de passe dans src/config.js)</p>
-        )}
       </form>
     </div>
   );

@@ -23,7 +23,21 @@ export const formatPrix = (n) =>
     maximumFractionDigits: 2,
   });
 
-export const imageDe = (item, type) => item.image || placeholder(item.nom || item.legende || "DZ", type);
+/**
+ * Sécurité : n'accepte que les images de sources sûres — photo téléversée
+ * (data:image/… ou blob:), lien https://, ou fichier du site (ex. "hero.svg").
+ * Tout le reste (javascript:, http:, texte bizarre) est ignoré → "".
+ */
+export function imageSure(url) {
+  const u = String(url || "").trim();
+  if (/^data:image\/(png|jpe?g|webp|gif|avif);base64,[a-z0-9+/=\s]+$/i.test(u)) return u;
+  if (/^blob:https?:\/\//i.test(u)) return u;
+  if (/^https:\/\/[^\s"'()<>\\]+$/i.test(u)) return u;
+  if (/^[\w-]+(\/[\w-]+)*\.(svg|png|jpe?g|webp|gif|avif)$/i.test(u)) return u;
+  return "";
+}
+
+export const imageDe = (item, type) => imageSure(item.image) || placeholder(item.nom || item.legende || "DZ", type);
 
 /** "2026-12-02" → "mercredi 2 décembre 2026" */
 export function formatDate(iso) {

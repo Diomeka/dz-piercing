@@ -101,5 +101,12 @@ export function useSite() {
 export function lienComplet(url) {
   const u = String(url || "").trim();
   if (!u) return "";
-  return /^https?:\/\//i.test(u) ? u : `https://${u.replace(/^\/+/, "")}`;
+  // Sécurité : seulement des liens web (jamais javascript:, data:…)
+  const lien = /^https?:\/\//i.test(u) ? u : `https://${u.replace(/^\/+/, "")}`;
+  try {
+    const p = new URL(lien);
+    return p.protocol === "https:" || p.protocol === "http:" ? p.href : "";
+  } catch {
+    return "";
+  }
 }

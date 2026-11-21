@@ -6,6 +6,7 @@ import App from "./App.jsx";
 import { ToastProvider } from "./components/Toast.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import api, { logout } from "./api/index.js";
+import { ADMIN_TEST } from "./test/identifiants.js";
 
 let root, container;
 
@@ -69,7 +70,7 @@ describe("L'espace admin reste discret et séparé", () => {
   });
 
   it("l'admin connecté a sa propre interface, avec « Voir le site » et sans les menus clients", async () => {
-    await api.login("admin@dzpiercing.ht", "dz2026");
+    await api.login(ADMIN_TEST.email, ADMIN_TEST.motDePasse);
     const el = await ouvrir("admin");
     expect(el.textContent).toContain("Tableau de bord");
     expect(el.textContent).toContain("Voir le site");
@@ -84,7 +85,7 @@ describe("Pied de page", () => {
     const el = await ouvrir("");
     const pied = el.querySelector(".footer");
     expect(pied.querySelector('a[aria-label="Instagram"]')).not.toBeNull();
-    expect(pied.textContent).toContain("WhatsApp");
+    expect(pied.querySelector('a.reseau-whatsapp[aria-label="WhatsApp"]').href).toMatch(/^https:\/\/wa\.me\/509/);
     expect(pied.textContent).not.toMatch(/youtube/i);
     const noms = [...pied.querySelectorAll(".paiement")].map((p) => p.dataset.nom);
     expect(noms).toEqual(["MonCash", "NatCash", "Virement bancaire"]);

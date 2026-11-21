@@ -457,7 +457,18 @@ legend { font-weight: 600; font-size: 0.95rem; margin-bottom: 8px; }
 .reseaux { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; margin: 16px 0 6px; }
 .reseau { width: 44px; height: 44px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--bord); color: var(--texte); transition: color 0.2s, border-color 0.2s, transform 0.2s; }
 .reseau:hover, .reseau:focus-visible { color: var(--or-texte); border-color: var(--or); transform: translateY(-2px); }
-.reseau-wa { min-height: 44px; border-radius: 999px; }
+/* Couleurs officielles de chaque réseau (fond de la pastille) */
+.reseau { border: 0; color: #fff; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25); }
+.reseau:hover, .reseau:focus-visible { color: #fff; transform: translateY(-2px) scale(1.06); }
+.reseau-instagram { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285aeb 90%); }
+.reseau-tiktok { background: #000; box-shadow: inset 0 0 0 1px #333, -2px -2px 0 -1px #25f4ee, 2px 2px 0 -1px #fe2c55; }
+.reseau-tiktok svg { filter: drop-shadow(-1px -1px 0 #25f4ee) drop-shadow(1px 1px 0 #fe2c55); }
+.reseau-facebook { background: #1877f2; }
+.reseau-snapchat { background: #fffc00; color: #000; }
+.reseau-snapchat:hover, .reseau-snapchat:focus-visible { color: #000; }
+.reseau-snapchat svg path { stroke: #000; stroke-width: 0.6; fill: #fff; }
+.reseau-x { background: #000; box-shadow: inset 0 0 0 1px #3a3a3a; }
+.reseau-whatsapp { background: #25d366; }
 
 .paiements { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 14px 0 4px; }
 .paiements-titre { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--texte-2); }

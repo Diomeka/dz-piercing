@@ -12,7 +12,20 @@ import { injecterFicheCommerce } from "./lib/seo.js";
 import api from "./api/index.js";
 import { appliquerReglages } from "./lib/site.js";
 
+/** Sécurité anti-« clickjacking » : le site refuse de s'afficher à l'intérieur d'un autre site. */
+function estEncadreParUnAutreSite() {
+  try {
+    return window.top !== window.self && window.top.location.origin !== window.location.origin;
+  } catch {
+    return true; // accès refusé à window.top = cadre d'un autre site
+  }
+}
+
 function afficher() {
+  if (estEncadreParUnAutreSite()) {
+    document.getElementById("root").textContent = "Ouvre DZ PIERCING directement dans ton navigateur.";
+    return;
+  }
   injecterFicheCommerce(); // fiche Google (adresse, horaires…) à partir des réglages
   createRoot(document.getElementById("root")).render(
     <StrictMode>

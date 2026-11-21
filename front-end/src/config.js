@@ -59,9 +59,14 @@ const CONFIG = {
   // (fichier front-end/.env, voir .env.example) sans modifier ce fichier.
   apiUrl: import.meta.env?.VITE_API_URL || "",
 
-  // Compte admin du MODE DÉMO uniquement (e-mail + mot de passe).
-  // En production, les comptes sont gérés et vérifiés par le serveur.
-  emailAdminDemo: "admin@dzpiercing.ht",
-  motDePasseDemo: "dz2026",
+  // Compte admin du MODE DÉMO uniquement. En production, les comptes sont
+  // gérés et vérifiés par le serveur (voir BACKEND.md).
+  // 🔒 Le mot de passe n'est PAS écrit ici : seulement son empreinte (impossible
+  // à inverser). Pour en changer : `npm run mot-de-passe-admin` (dossier front-end).
+  adminDemo: {
+    email: "admin@dzpiercing.ht",
+    sel: "2a9ec4a8ce577def083c392d8e1e8592",
+    empreinte: "75fbe9b91542ad69d4bf8bfea595744e5f9b031118fcba25ca4d3d8f19955c34",
+  },
 };
 export default CONFIG;

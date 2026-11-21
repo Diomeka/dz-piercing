@@ -5,6 +5,7 @@ import useSession from "../../components/useSession.js";
 import Consentement from "../../components/Consentement.jsx";
 import Icon from "../../components/Icon.jsx";
 import { emailValide, telValide } from "../../lib/format.js";
+import { motDePasseValide } from "../../api/index.js";
 import { destination } from "./Connexion.jsx";
 
 export default function Inscription() {
@@ -27,7 +28,7 @@ export default function Inscription() {
     if (!f.nom.trim()) return setErreur("Écris ton nom.");
     if (!emailValide(f.email)) return setErreur("Adresse e-mail invalide.");
     if (!telValide(f.telephone)) return setErreur("Numéro de téléphone invalide (8 chiffres minimum, ex. 3712-3456).");
-    if (f.motDePasse.length < 8) return setErreur("Le mot de passe doit faire au moins 8 caractères.");
+    if (!motDePasseValide(f.motDePasse)) return setErreur("Mot de passe trop faible : 8 caractères minimum, avec des lettres et des chiffres.");
     if (f.motDePasse !== f.confirmation) return setErreur("Les deux mots de passe ne sont pas identiques.");
     if (!accord) return setErreur("Coche la case d'accord pour créer ton compte.");
     setEnvoi(true);
@@ -50,7 +51,7 @@ export default function Inscription() {
         <label className="field">Nom<input value={f.nom} onChange={set("nom")} autoComplete="name" placeholder="Prénom Nom" /></label>
         <label className="field">E-mail<input type="email" value={f.email} onChange={set("email")} autoComplete="email" inputMode="email" placeholder="ton@email.com" /></label>
         <label className="field">Téléphone<input type="tel" value={f.telephone} onChange={set("telephone")} autoComplete="tel" inputMode="tel" placeholder="3712-3456" /></label>
-        <label className="field">Mot de passe (8 caractères minimum)
+        <label className="field">Mot de passe (8 caractères min., lettres + chiffres)
           <span className="password">
             <input type={voir ? "text" : "password"} value={f.motDePasse} onChange={set("motDePasse")} autoComplete="new-password" />
             <button type="button" className="link-gold" onClick={() => setVoir((v) => !v)}>{voir ? "Masquer" : "Afficher"}</button>

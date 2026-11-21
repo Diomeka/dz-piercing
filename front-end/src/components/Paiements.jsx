@@ -1,4 +1,5 @@
 import { useSite, MOYENS_PAIEMENT } from "../lib/site.js";
+import { imageSure } from "../lib/format.js";
 
 /** Pastille par défaut (tant que l'admin n'a pas téléversé le logo officiel). */
 function Pastille({ id }) {
@@ -22,7 +23,7 @@ export default function Paiements({ className = "" }) {
       <span className="paiements-titre">Paiement accepté</span>
       <ul className="paiements-liste">
         {actifs.map((m) => {
-          const logo = site.paiements?.[m.id]?.logo;
+          const logo = imageSure(site.paiements?.[m.id]?.logo);
           return (
             <li key={m.id}>
               <span className={`paiement paiement-${m.id}`} tabIndex={0} data-nom={m.label} aria-label={m.label}>

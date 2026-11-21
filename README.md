@@ -28,7 +28,9 @@ galerie, conseils de soins, contact, et un espace admin protégé par mot de pas
 ### Interface admin (séparée du site)
 - Sur le site, appuie sur **Connexion** (en haut à droite, ou menu « Plus » sur téléphone) et connecte-toi
   avec l'**e-mail admin**. Tu arrives directement dans l'interface admin.
-  - Mode démo : `admin@dzpiercing.ht` / `dz2026` (dans `front-end/src/config.js`).
+  - Mode démo : e-mail `admin@dzpiercing.ht`. Le mot de passe n'est écrit **nulle part** dans le code
+    (seulement son empreinte) : la propriétaire l'a reçu en privé. Pour le changer :
+    `npm run mot-de-passe-admin` dans le dossier `front-end`.
 - Dans l'admin : bouton **« Voir le site »** pour revenir au site, **« Déconnexion »** pour sortir.
 - Onglets : **RDV**, **Commandes** (accepter / refuser, prévenir le client sur WhatsApp),
   **Piercings**, **Bracelets** (ajouter / modifier / supprimer avec photo, nom, prix), **Galerie**, et
@@ -56,6 +58,19 @@ Le dépôt contient déjà une publication automatique (`.github/workflows/deplo
    `https://TON-PSEUDO.github.io/NOM-DU-DEPOT/`.
 
 ---
+
+## 🔒 Sécurité (front-end)
+
+- **Aucun mot de passe en clair** dans le code : le compte admin de démo est vérifié par une empreinte
+  SHA-256 salée et répétée 20 000 fois (`src/lib/motdepasse.js`) ; les comptes clients de démo aussi.
+- **Blocage** 1 minute après 5 erreurs de connexion ; mots de passe : 8 caractères min., lettres + chiffres.
+- **CSP** (politique de sécurité du contenu) dans la version publiée : seuls les scripts du site s'exécutent.
+- **Anti-clickjacking** : le site refuse de s'afficher dans le cadre d'un autre site.
+- **Liens et images filtrés** (pas de `javascript:`, pas d'images de sources non sûres), redirection
+  après connexion limitée à une liste de pages, pas de code source (sourcemaps) publié.
+- Tests automatiques dédiés : `src/securite.test.js`. Dépendances surveillées par Dependabot + `npm audit`.
+- ⚠️ Limite honnête : tant qu'il n'y a pas de serveur (mode démo), tout se passe dans le navigateur,
+  donc rien n'y est vraiment secret ni protégé. **La vraie sécurité est côté serveur** (voir `BACKEND.md`).
 
 ## 🔵 Pour les développeurs
 
