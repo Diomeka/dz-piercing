@@ -15,7 +15,28 @@ export default function Accueil() {
       <section className="hero" style={{ backgroundImage: `url(${CONFIG.photoAccueil})` }}>
         <div className="hero-overlay" />
         <div className="container hero-content">
-          <Logo size="xl" />
+          <div className="hero-mark">
+            {/* Cercle doré décoratif, toujours centré derrière le logo */}
+            <svg className="hero-ring" viewBox="0 0 400 400" aria-hidden="true">
+              <defs>
+                <linearGradient id="heroOr" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stopColor="#f6e27a" /><stop offset=".5" stopColor="#d4af37" /><stop offset="1" stopColor="#9c7a22" />
+                </linearGradient>
+              </defs>
+              <circle cx="200" cy="200" r="196" fill="none" stroke="#d4af37" strokeOpacity=".18" strokeWidth="1.5" />
+              <g className="hero-ring-spin">
+                <circle cx="200" cy="200" r="172" fill="none" stroke="url(#heroOr)" strokeWidth="7"
+                  strokeLinecap="round" strokeDasharray="860 2000" transform="rotate(-60 200 200)" />
+                <circle cx="200" cy="200" r="138" fill="none" stroke="url(#heroOr)" strokeOpacity=".45" strokeWidth="2.5"
+                  strokeLinecap="round" strokeDasharray="420 2000" transform="rotate(110 200 200)" />
+                {/* petite bille au bout de l'arc (angle -60° + longueur de l'arc) */}
+                <circle cx={200 + 172 * Math.cos(((-60 + (860 / (2 * Math.PI * 172)) * 360) * Math.PI) / 180)}
+                  cy={200 + 172 * Math.sin(((-60 + (860 / (2 * Math.PI * 172)) * 360) * Math.PI) / 180)}
+                  r="11" fill="url(#heroOr)" />
+              </g>
+            </svg>
+            <Logo size="xl" />
+          </div>
           <p className="hero-slogan">{CONFIG.slogan}</p>
           <div className="hero-actions">
             <Link to="/rendez-vous" className="btn btn-gold btn-lg">
