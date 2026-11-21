@@ -1,4 +1,4 @@
-/* Génère une image d'attente noir & or tant qu'aucune vraie photo n'est ajoutée. */
+/* Génère une image d'attente ivoire & or tant qu'aucune vraie photo n'est ajoutée. */
 
   function esc(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -21,7 +21,7 @@ export function placeholder(label, type) {
     } else if (type === "galerie") {
       art = `
         <circle cx="300" cy="270" r="${r}" fill="none" stroke="url(#g)" stroke-width="10" stroke-dasharray="${(h % 500) + 200} 2000" stroke-linecap="round" transform="rotate(${rot} 300 270)"/>
-        <circle cx="300" cy="270" r="${r - 40}" fill="none" stroke="#ffffff22" stroke-width="2"/>
+        <circle cx="300" cy="270" r="${r - 40}" fill="none" stroke="#8a6a1233" stroke-width="2"/>
         <circle cx="${300 + r * Math.cos(rot)}" cy="${270 + r * Math.sin(rot)}" r="16" fill="url(#g)"/>`;
     } else {
       art = `
@@ -30,13 +30,13 @@ export function placeholder(label, type) {
     }
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
       <defs>
-        <radialGradient id="bg" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#262219"/><stop offset="1" stop-color="#0a0a0a"/></radialGradient>
+        <radialGradient id="bg" cx="50%" cy="40%" r="75%"><stop offset="0" stop-color="#fffdf8"/><stop offset="1" stop-color="#efe6d3"/></radialGradient>
         <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6e27a"/><stop offset=".5" stop-color="#d4af37"/><stop offset="1" stop-color="#9c7a22"/></linearGradient>
       </defs>
       <rect width="600" height="600" fill="url(#bg)"/>
       ${art}
-      <text x="300" y="510" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="40" letter-spacing="4" fill="#d4af37">${esc(String(label).toUpperCase().slice(0, 22))}</text>
-      <text x="300" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" letter-spacing="6" fill="#ffffff66">PHOTO À VENIR</text>
+      <text x="300" y="510" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="40" letter-spacing="4" fill="#8a6a12">${esc(String(label).toUpperCase().slice(0, 22))}</text>
+      <text x="300" y="550" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" letter-spacing="6" fill="#16130d66">PHOTO À VENIR</text>
     </svg>`;
     return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
 }
