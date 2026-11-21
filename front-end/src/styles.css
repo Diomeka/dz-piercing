@@ -37,7 +37,7 @@
 }
 
 /* Zones NOIRES : mêmes noms de variables, valeurs sombres */
-.topbar, .hero, .bottom-nav, .footer {
+.topbar, .bottom-nav, .footer {
   --fond: #0a0a0a;
   --surface: #141414;
   --surface-2: #1c1c1c;
@@ -83,7 +83,7 @@ p { margin: 0 0 0.6em; }
 /* ------------------------------ Logo ------------------------------ */
 .logo { display: inline-flex; align-items: baseline; gap: 8px; font-family: var(--titre); letter-spacing: 0.06em; line-height: 1; }
 .logo-dz { background: var(--or-degrade); -webkit-background-clip: text; background-clip: text; color: transparent; font-size: 1.9em; }
-.logo-txt { color: var(--blanc); font-size: 1.15em; letter-spacing: 0.22em; }
+.logo-txt { color: var(--texte); font-size: 1.15em; letter-spacing: 0.22em; }
 .logo-sm { font-size: 16px; }
 .logo-md { font-size: 20px; }
 .logo-xl { font-size: clamp(38px, 11vw, 76px); flex-direction: column; align-items: center; gap: 0; }
@@ -163,14 +163,16 @@ p { margin: 0 0 0.6em; }
 .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 /* ------------------------------ Accueil ------------------------------ */
-.hero { background-color: var(--noir); position: relative; min-height: min(86vh, 720px); display: flex; align-items: center; background-size: cover; background-position: center; overflow: hidden; }
-.hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10, 10, 10, 0.1) 0%, rgba(10, 10, 10, 0.45) 100%); }
+.hero { background-color: var(--fond); position: relative; min-height: min(78vh, 680px); display: flex; align-items: center; background-size: cover; background-position: center; overflow: hidden; }
+/* voile ivoire : garde le texte lisible même sur une vraie photo */
+.hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(247, 243, 234, 0.35) 0%, rgba(247, 243, 234, 0.75) 70%, var(--fond) 100%); }
+.hero .logo-dz { background: linear-gradient(135deg, #e3c35a 0%, #c19a2b 50%, #8a6a12 100%); -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 6px 18px rgba(138, 106, 18, 0.25)); }
 .hero-content { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; padding-top: 48px; padding-bottom: 48px; }
 .hero-mark { position: relative; display: grid; place-items: center; width: clamp(250px, 72vw, 400px); aspect-ratio: 1; margin: 0 auto -8px; }
 .hero-mark .logo { position: relative; z-index: 1; }
-.hero-ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 18px rgba(212, 175, 55, 0.25)); }
+.hero-ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 4px 14px rgba(138, 106, 18, 0.18)); }
 .hero-ring-spin { transform-origin: 200px 200px; animation: spin 60s linear infinite; }
-.hero-slogan { font-size: 1.15rem; color: #e8e8e8; max-width: 440px; }
+.hero-slogan { font-size: 1.15rem; color: var(--texte-2); max-width: 440px; }
 .hero-actions { display: grid; gap: 12px; width: 100%; max-width: 420px; }
 
 .section { margin-top: 36px; }

@@ -1,15 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" preserveAspectRatio="xMidYMid slice">
-  <!-- Fond d'accueil : dégradé + quelques reflets. Le cercle doré est dessiné
+  <!-- Fond d'accueil clair : ivoire + halo doré. Le cercle doré est dessiné
        séparément (src/pages/Accueil.jsx) pour rester centré sur le logo. -->
   <defs>
-    <radialGradient id="bg" cx="50%" cy="40%" r="75%">
-      <stop offset="0" stop-color="#2b2416"/><stop offset=".55" stop-color="#121110"/><stop offset="1" stop-color="#050505"/>
+    <radialGradient id="bg" cx="50%" cy="42%" r="70%">
+      <stop offset="0" stop-color="#fffdf7"/><stop offset=".6" stop-color="#f7f1e2"/><stop offset="1" stop-color="#efe5cf"/>
     </radialGradient>
   </defs>
   <rect width="1200" height="900" fill="url(#bg)"/>
-  <g fill="#ffffff" opacity=".07">
-    <circle cx="200" cy="140" r="2"/><circle cx="320" cy="620" r="3"/><circle cx="520" cy="120" r="2"/>
+  <g fill="#b8922a" opacity=".22">
+    <circle cx="200" cy="140" r="2.5"/><circle cx="320" cy="620" r="3"/><circle cx="520" cy="120" r="2"/>
     <circle cx="1100" cy="700" r="3"/><circle cx="640" cy="790" r="2"/><circle cx="120" cy="480" r="3"/>
-    <circle cx="960" cy="160" r="2"/><circle cx="1050" cy="420" r="2"/><circle cx="420" cy="380" r="2"/>
+    <circle cx="960" cy="160" r="2.5"/><circle cx="1050" cy="420" r="2"/><circle cx="420" cy="380" r="2"/>
   </g>
 </svg>

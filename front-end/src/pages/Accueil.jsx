@@ -20,7 +20,7 @@ export default function Accueil() {
             <svg className="hero-ring" viewBox="0 0 400 400" aria-hidden="true">
               <defs>
                 <linearGradient id="heroOr" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stopColor="#f6e27a" /><stop offset=".5" stopColor="#d4af37" /><stop offset="1" stopColor="#9c7a22" />
+                  <stop offset="0" stopColor="#e3c35a" /><stop offset=".5" stopColor="#c19a2b" /><stop offset="1" stopColor="#8a6a12" />
                 </linearGradient>
               </defs>
               <circle cx="200" cy="200" r="196" fill="none" stroke="#d4af37" strokeOpacity=".18" strokeWidth="1.5" />
