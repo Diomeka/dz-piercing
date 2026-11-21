@@ -1,8 +1,10 @@
+import { useState } from "react";
 import CONFIG from "../config.js";
 import Icon from "../components/Icon.jsx";
 import { JOURS, lienTel, lienWhatsApp } from "../lib/format.js";
 
 export default function Contact() {
+  const [carte, setCarte] = useState(false);
   const maps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(CONFIG.adresse)}`;
   const ordre = [1, 2, 3, 4, 5, 6, 0];
 
@@ -32,13 +34,23 @@ export default function Contact() {
         <h2 className="title-sm"><Icon name="pin" /> Adresse</h2>
         <p className="big">{CONFIG.adresse}</p>
         <a className="btn btn-outline btn-block" href={maps} target="_blank" rel="noreferrer">Ouvrir l'itinéraire</a>
-        <iframe
-          className="map"
-          title="Plan d'accès"
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          src={`https://www.google.com/maps?q=${encodeURIComponent(CONFIG.adresse)}&output=embed`}
-        />
+        {/* La carte Google n'est chargée que si le client la demande (RGPD : pas d'envoi
+            automatique de son adresse IP à Google, et page plus rapide) */}
+        {carte ? (
+          <iframe
+            className="map"
+            title="Plan d'accès"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            src={`https://www.google.com/maps?q=${encodeURIComponent(CONFIG.adresse)}&output=embed`}
+          />
+        ) : (
+          <button className="map map-placeholder" onClick={() => setCarte(true)}>
+            <Icon name="pin" size={32} />
+            <strong>Afficher la carte</strong>
+            <small>La carte est fournie par Google Maps</small>
+          </button>
+        )}
       </section>
 
       <section className="card section">

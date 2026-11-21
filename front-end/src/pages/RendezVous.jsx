@@ -5,6 +5,7 @@ import useData, { Chargement, Erreur } from "../components/useData.jsx";
 import Icon from "../components/Icon.jsx";
 import { useToast } from "../components/Toast.jsx";
 import Consentement from "../components/Consentement.jsx";
+import { ajouterAgenda } from "../lib/agenda.js";
 import {
   aujourdhui, creneauxDuJour, formatDate, formatPrix, imageDe, lienWhatsApp, telValide,
 } from "../lib/format.js";
@@ -74,6 +75,9 @@ export default function RendezVous() {
             <dt>Heure</dt><dd>{confirme.heure}</dd>
             <dt>Statut</dt><dd><span className="badge badge-pending">En attente de confirmation</span></dd>
           </dl>
+          <button className="btn btn-gold btn-block" onClick={() => ajouterAgenda(confirme, piercing?.duree)}>
+            <Icon name="calendar" /> Ajouter à mon agenda
+          </button>
           <a className="btn btn-whatsapp btn-block" href={lienWhatsApp(texte)} target="_blank" rel="noreferrer">
             <Icon name="whatsapp" /> M'envoyer aussi un WhatsApp
           </a>

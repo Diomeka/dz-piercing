@@ -31,7 +31,9 @@ export default function Confidentialite() {
           Tu peux aussi saisir la CNIL (www.cnil.fr).</p>
         <p><strong>Cookies :</strong> ce site n'utilise pas de cookies publicitaires ni de mesure d'audience.
           Seul un stockage technique est utilisé pour faire fonctionner l'espace admin.
-          La carte de la page Contact est fournie par Google Maps.</p>
+          Les polices d'écriture sont hébergées avec le site (aucun appel à Google Fonts).
+          La carte de la page Contact (Google Maps) ne se charge que si tu cliques sur « Afficher la carte » ;
+          Google peut alors déposer ses propres cookies.</p>
       </section>
     </div>
   );
