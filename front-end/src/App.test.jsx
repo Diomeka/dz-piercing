@@ -56,3 +56,11 @@ describe("Chaque page s'affiche sans planter (pas d'écran noir)", () => {
     });
   }
 });
+
+describe("L'espace admin reste discret", () => {
+  it("aucun lien vers l'admin n'est visible par les clients", async () => {
+    const el = await ouvrir("");
+    expect(el.querySelector('a[href="#/admin"]')).toBeNull();
+    expect(el.textContent).not.toContain("Espace admin");
+  });
+});

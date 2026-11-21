@@ -80,7 +80,6 @@ export default function Layout() {
             <a href={CONFIG.instagram} target="_blank" rel="noreferrer">Instagram</a>
             <a href={CONFIG.tiktok} target="_blank" rel="noreferrer">TikTok</a>
             <Link to="/confidentialite">Mentions légales & confidentialité</Link>
-            <Link to="/admin">Espace admin</Link>
           </p>
           <p className="muted small">© {new Date().getFullYear()} {CONFIG.nomBoutique}</p>
         </div>
@@ -109,9 +108,8 @@ export default function Layout() {
                 <Icon name={l.icon} /> {l.label}
               </NavLink>
             ))}
-            <NavLink to="/admin" className="sheet-link sheet-admin">
-              <Icon name="lock" /> Espace admin
-            </NavLink>
+            {/* Pas de lien vers l'admin pour les clients : la propriétaire y accède
+                par l'adresse directe …/#/admin (à garder en favori). */}
           </div>
         </div>
       )}

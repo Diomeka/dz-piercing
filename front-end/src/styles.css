@@ -104,7 +104,6 @@ p { margin: 0 0 0.6em; }
 .sheet-link { display: flex; align-items: center; gap: 14px; padding: 16px 12px; min-height: 58px; border-radius: 14px; font-size: 1.1rem; font-weight: 600; }
 .sheet-link svg { color: var(--or); }
 .sheet-link.active, .sheet-link:hover { background: var(--surface-2); }
-.sheet-admin { color: var(--texte-2); border-top: 1px solid var(--bord); border-radius: 0; margin-top: 8px; }
 
 /* ------------------------------ Pied de page ------------------------------ */
 .footer { border-top: 1px solid var(--bord); padding: 32px 0 calc(var(--bottom-nav) + 32px); text-align: center; color: var(--texte-2); }

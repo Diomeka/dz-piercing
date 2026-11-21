@@ -36,7 +36,9 @@ galerie, conseils de soins, contact, et un espace admin protégé par mot de pas
 Ouvre `front-end/src/config.js` avec le Bloc-notes, change le texte entre guillemets, enregistre.
 
 ### Espace admin
-- Accès : en bas de page → **Espace admin** (ou menu « Plus » sur téléphone).
+- Accès : il n'y a **aucun lien visible** pour les clients. Ouvre directement
+  **https://diomeka.github.io/dz-piercing/#/admin** (en local : http://localhost:5173/#/admin)
+  et **ajoute la page à tes favoris** (ou à l'écran d'accueil de ton téléphone).
 - Mot de passe de démo : `dz2026` (modifiable dans `config.js`).
 - Tu peux : ajouter/modifier/supprimer piercings et bracelets (avec photo), accepter/refuser
   rendez-vous et commandes (puis prévenir le client sur WhatsApp en un clic), gérer la galerie.
