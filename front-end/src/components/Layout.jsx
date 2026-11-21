@@ -27,7 +27,9 @@ export function Logo({ size = "md" }) {
 export default function Layout() {
   const [menuOuvert, setMenuOuvert] = useState(false);
   const { pathname } = useLocation();
-  useEffect(() => setMenuOuvert(false), [pathname]);
+  useEffect(() => {
+    setMenuOuvert(false);
+  }, [pathname]);
   const surSecondaire = SECONDAIRES.some((l) => pathname.startsWith(l.to)) || pathname.startsWith("/admin");
 
   return (

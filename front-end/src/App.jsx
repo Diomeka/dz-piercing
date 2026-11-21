@@ -13,7 +13,9 @@ import NotFound from "./pages/NotFound.jsx";
 
 export default function App() {
   const { pathname } = useLocation();
-  useEffect(() => window.scrollTo(0, 0), [pathname]);
+  useEffect(() => {
+    window.scrollTo(0, 0); // accolades : les Chrome récents renvoient une Promise, interdite comme retour d'effet
+  }, [pathname]);
 
   return (
     <Routes>
