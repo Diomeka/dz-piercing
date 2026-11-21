@@ -1,18 +1,21 @@
 import { Link } from "react-router-dom";
-import CONFIG from "../config.js";
 import api from "../api/index.js";
 import useData from "../components/useData.jsx";
 import { Logo } from "../components/Layout.jsx";
 import Icon from "../components/Icon.jsx";
 import { formatPrix, imageDe } from "../lib/format.js";
+import { useSite } from "../lib/site.js";
 
 export default function Accueil() {
   const piercings = useData(() => api.piercings.list());
   const bracelets = useData(() => api.bracelets.list());
+  const site = useSite(); // contenu modifiable dans l'admin (onglet Site)
+  const menu = (id) => site.menus[id]?.visible !== false;
+  const atouts = (site.accueil.atouts || []).filter((a) => a.titre?.trim());
 
   return (
     <>
-      <section className="hero" style={{ backgroundImage: `url(${CONFIG.photoAccueil})` }}>
+      <section className="hero" style={{ backgroundImage: `url(${site.accueil.photo || "hero.svg"})` }}>
         <div className="hero-overlay" />
         <div className="container hero-content">
           <div className="hero-mark">
@@ -37,27 +40,33 @@ export default function Accueil() {
             </svg>
             <Logo size="xl" />
           </div>
-          <p className="hero-slogan">{CONFIG.slogan}</p>
+          <p className="hero-slogan">{site.accueil.slogan}</p>
           <div className="hero-actions">
-            <Link to="/rendez-vous" className="btn btn-gold btn-lg">
-              <Icon name="calendar" /> Prendre rendez-vous
-            </Link>
-            <Link to="/bracelets" className="btn btn-outline btn-lg">
-              <Icon name="bag" /> Voir les bracelets
-            </Link>
+            {menu("rendez-vous") && (
+              <Link to="/rendez-vous" className="btn btn-gold btn-lg">
+                <Icon name="calendar" /> Prendre rendez-vous
+              </Link>
+            )}
+            {menu("bracelets") && (
+              <Link to="/bracelets" className="btn btn-outline btn-lg">
+                <Icon name="bag" /> Voir les bracelets
+              </Link>
+            )}
           </div>
         </div>
       </section>
 
-      <section className="container section">
-        <div className="atouts">
-          <div className="atout"><span>✦</span><strong>Matériel stérile</strong><small>Usage unique</small></div>
-          <div className="atout"><span>✦</span><strong>Bijoux de qualité</strong><small>Acier & titane</small></div>
-          <div className="atout"><span>✦</span><strong>Conseils offerts</strong><small>Suivi des soins</small></div>
-        </div>
-      </section>
+      {atouts.length > 0 && (
+        <section className="container section">
+          <div className="atouts" style={{ gridTemplateColumns: `repeat(${atouts.length}, 1fr)` }}>
+            {atouts.map((a, i) => (
+              <div key={i} className="atout"><span>✦</span><strong>{a.titre}</strong>{a.texte && <small>{a.texte}</small>}</div>
+            ))}
+          </div>
+        </section>
+      )}
 
-      <section className="container section">
+      {site.accueil.afficherPiercings && menu("piercings") && <section className="container section">
         <div className="section-head">
           <h2 className="title">Piercings populaires</h2>
           <Link to="/piercings" className="link-gold">Tout voir →</Link>
@@ -70,9 +79,9 @@ export default function Accueil() {
             </Link>
           ))}
         </div>
-      </section>
+      </section>}
 
-      <section className="container section">
+      {site.accueil.afficherBracelets && menu("bracelets") && <section className="container section">
         <div className="section-head">
           <h2 className="title">La boutique bracelets</h2>
           <Link to="/bracelets" className="link-gold">Tout voir →</Link>
@@ -85,13 +94,13 @@ export default function Accueil() {
             </Link>
           ))}
         </div>
-      </section>
+      </section>}
 
       <section className="container section">
         <div className="tiles">
-          <Link to="/galerie" className="tile"><Icon name="image" size={30} /><strong>Galerie</strong><small>Mes réalisations</small></Link>
-          <Link to="/soins" className="tile"><Icon name="heart" size={30} /><strong>Soins</strong><small>Bien cicatriser</small></Link>
-          <Link to="/contact" className="tile"><Icon name="phone" size={30} /><strong>Contact</strong><small>WhatsApp, appel</small></Link>
+          {menu("galerie") && <Link to="/galerie" className="tile"><Icon name="image" size={30} /><strong>Galerie</strong><small>Mes réalisations</small></Link>}
+          {menu("soins") && <Link to="/soins" className="tile"><Icon name="heart" size={30} /><strong>Soins</strong><small>Bien cicatriser</small></Link>}
+          {menu("contact") && <Link to="/contact" className="tile"><Icon name="phone" size={30} /><strong>Contact</strong><small>WhatsApp, appel</small></Link>}
         </div>
       </section>
     </>

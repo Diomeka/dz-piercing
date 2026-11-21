@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import api from "../api/index.js";
+import api, { getUser } from "../api/index.js";
 import useData, { Chargement, Erreur } from "../components/useData.jsx";
 import Icon from "../components/Icon.jsx";
 import { useToast } from "../components/Toast.jsx";
@@ -21,8 +21,9 @@ export default function RendezVous() {
   const creneauxPris = useData(() => (date ? api.rendezvous.booked(date) : []), [date]);
   const pris = creneauxPris.data || [];
   const chargementCreneaux = creneauxPris.loading;
-  const [nom, setNom] = useState("");
-  const [telephone, setTelephone] = useState("");
+  const client = getUser()?.role === "client" ? getUser() : null; // compte connecté → champs pré-remplis
+  const [nom, setNom] = useState(client?.nom || "");
+  const [telephone, setTelephone] = useState(client?.telephone || "");
   const [message, setMessage] = useState("");
   const [accord, setAccord] = useState(false);
   const [erreur, setErreur] = useState("");
@@ -39,7 +40,7 @@ export default function RendezVous() {
     if (!date) return setErreur("Choisis une date.");
     if (!heure) return setErreur("Choisis une heure.");
     if (!nom.trim()) return setErreur("Écris ton nom.");
-    if (!telValide(telephone)) return setErreur("Numéro de téléphone invalide (10 chiffres minimum).");
+    if (!telValide(telephone)) return setErreur("Numéro de téléphone invalide (8 chiffres minimum, ex. 3712-3456).");
     if (!accord) return setErreur("Coche la case d'accord pour envoyer ta demande.");
     setEnvoi(true);
     try {
@@ -82,6 +83,9 @@ export default function RendezVous() {
             <Icon name="whatsapp" /> M'envoyer aussi un WhatsApp
           </a>
           <Link to="/soins" className="btn btn-outline btn-block">Lire les conseils de soins</Link>
+          {client
+            ? <Link to="/compte" className="btn btn-outline btn-block">Suivre dans mon compte</Link>
+            : <p className="muted small center">Crée un compte pour suivre tes rendez-vous : <Link to="/inscription" className="link-gold">créer un compte</Link></p>}
           <Link to="/" className="link-gold center">Retour à l'accueil</Link>
         </div>
       </div>
@@ -149,7 +153,7 @@ export default function RendezVous() {
           <section className="card step">
             <h2><span className="step-num">3</span> Tes coordonnées</h2>
             <label className="field">Nom<input value={nom} onChange={(e) => setNom(e.target.value)} autoComplete="name" placeholder="Prénom Nom" /></label>
-            <label className="field">Téléphone<input value={telephone} onChange={(e) => setTelephone(e.target.value)} type="tel" inputMode="tel" autoComplete="tel" placeholder="06 12 34 56 78" /></label>
+            <label className="field">Téléphone<input value={telephone} onChange={(e) => setTelephone(e.target.value)} type="tel" inputMode="tel" autoComplete="tel" placeholder="3712-3456" /></label>
             <label className="field">Message (facultatif)<textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={2} placeholder="Une question, un bijou en particulier…" /></label>
             <p className="muted small">Mineur(e) ? Viens accompagné(e) d'un parent avec une pièce d'identité.</p>
             <Consentement checked={accord} onChange={setAccord} />

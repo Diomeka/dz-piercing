@@ -1,5 +1,6 @@
 import CONFIG from "../config.js";
 import { placeholder } from "./placeholder.js";
+import { getSite } from "./site.js";
 
 /* ----- Devise : choisie par l'admin (onglet Réglages), USD par défaut ----- */
 export const DEVISES = {
@@ -45,7 +46,7 @@ const toHHMM = (min) => `${String(Math.floor(min / 60)).padStart(2, "0")}:${Stri
 export function creneauxDuJour(iso) {
   const [y, m, d] = iso.split("-").map(Number);
   const jour = new Date(y, m - 1, d).getDay();
-  const h = CONFIG.horaires[jour];
+  const h = getSite().horaires[jour];
   if (!h) return null;
   const slots = [];
   for (let t = toMin(h[0]); t + CONFIG.dureeCreneau <= toMin(h[1]); t += CONFIG.dureeCreneau) slots.push(toHHMM(t));
@@ -59,12 +60,23 @@ export function creneauxDuJour(iso) {
 
 export const JOURS = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
 
-export const telValide = (t) => (t.match(/\d/g) || []).length >= 10;
+/** Haïti : 8 chiffres (ex. 3712-3456) ; accepte aussi +509 et les numéros étrangers */
+export const telValide = (t) => (t.match(/\d/g) || []).length >= 8;
+
+/** "3712-3456" → "50937123456" ; "+1 305 555 0100" → "13055550100" (format wa.me) */
+export function versWhatsApp(tel) {
+  let n = String(tel).replace(/\D/g, "");
+  if (n.startsWith("00")) n = n.slice(2);
+  if (n.length === 8) n = "509" + n;
+  return n;
+}
+
+export const emailValide = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(e).trim());
 
 export const lienWhatsApp = (texte) =>
-  `https://wa.me/${CONFIG.whatsapp}${texte ? `?text=${encodeURIComponent(texte)}` : ""}`;
+  `https://wa.me/${versWhatsApp(getSite().contact.whatsapp)}${texte ? `?text=${encodeURIComponent(texte)}` : ""}`;
 
-export const lienTel = () => `tel:${CONFIG.telephone.replace(/\s/g, "")}`;
+export const lienTel = () => `tel:${String(getSite().contact.telephone).replace(/[^\d+]/g, "")}`;
 
 export const STATUTS = {
   pending: { label: "En attente", cls: "badge-pending" },

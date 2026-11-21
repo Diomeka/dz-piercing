@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import api from "../api/index.js";
 import useData, { Chargement, Erreur } from "../components/useData.jsx";
@@ -5,6 +6,9 @@ import Modal from "../components/Modal.jsx";
 import Icon from "../components/Icon.jsx";
 import { useToast } from "../components/Toast.jsx";
 import Consentement from "../components/Consentement.jsx";
+import { phrasePaiement } from "../components/Paiements.jsx";
+import { useSite } from "../lib/site.js";
+import { getUser } from "../api/index.js";
 import { couleurHex, formatPrix, imageDe, lienWhatsApp, telValide } from "../lib/format.js";
 
 export function Pastilles({ couleurs }) {
@@ -21,8 +25,10 @@ function CommandeModal({ bracelet, onClose }) {
   const toast = useToast();
   const [couleur, setCouleur] = useState(bracelet.couleurs?.length === 1 ? bracelet.couleurs[0] : "");
   const [quantite, setQuantite] = useState(1);
-  const [nom, setNom] = useState("");
-  const [telephone, setTelephone] = useState("");
+  const site = useSite();
+  const client = getUser()?.role === "client" ? getUser() : null; // compte connecté → champs pré-remplis
+  const [nom, setNom] = useState(client?.nom || "");
+  const [telephone, setTelephone] = useState(client?.telephone || "");
   const [message, setMessage] = useState("");
   const [accord, setAccord] = useState(false);
   const [envoi, setEnvoi] = useState(false);
@@ -34,7 +40,7 @@ function CommandeModal({ bracelet, onClose }) {
     setErreur("");
     if (bracelet.couleurs?.length && !couleur) return setErreur("Choisis une couleur.");
     if (!nom.trim()) return setErreur("Écris ton nom.");
-    if (!telValide(telephone)) return setErreur("Numéro de téléphone invalide (10 chiffres minimum).");
+    if (!telValide(telephone)) return setErreur("Numéro de téléphone invalide (8 chiffres minimum, ex. 3712-3456).");
     if (!accord) return setErreur("Coche la case d'accord pour envoyer ta commande.");
     setEnvoi(true);
     try {
@@ -68,6 +74,7 @@ function CommandeModal({ bracelet, onClose }) {
           <a className="btn btn-whatsapp btn-block" href={lienWhatsApp(texte)} target="_blank" rel="noreferrer">
             <Icon name="whatsapp" /> Me prévenir aussi sur WhatsApp
           </a>
+          {client && <Link to="/compte" className="btn btn-outline btn-block" onClick={onClose}>Suivre dans mon compte</Link>}
           <button className="btn btn-outline btn-block" onClick={onClose}>Fermer</button>
         </div>
       </Modal>
@@ -109,7 +116,7 @@ function CommandeModal({ bracelet, onClose }) {
         </fieldset>
 
         <label className="field">Ton nom<input value={nom} onChange={(e) => setNom(e.target.value)} autoComplete="name" placeholder="Prénom Nom" /></label>
-        <label className="field">Ton téléphone<input value={telephone} onChange={(e) => setTelephone(e.target.value)} type="tel" autoComplete="tel" inputMode="tel" placeholder="06 12 34 56 78" /></label>
+        <label className="field">Ton téléphone<input value={telephone} onChange={(e) => setTelephone(e.target.value)} type="tel" autoComplete="tel" inputMode="tel" placeholder="3712-3456" /></label>
         <label className="field">Message (facultatif)<textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={2} placeholder="Taille du poignet, livraison ou retrait…" /></label>
 
         <Consentement checked={accord} onChange={setAccord} />
@@ -117,7 +124,7 @@ function CommandeModal({ bracelet, onClose }) {
 
         <div className="total-row"><span>Total</span><strong className="price price-lg">{formatPrix(bracelet.prix * quantite)}</strong></div>
         <button className="btn btn-gold btn-block btn-lg" disabled={envoi}>{envoi ? "Envoi…" : "Confirmer la commande"}</button>
-        <p className="muted small center">Paiement au retrait ou à la livraison. Aucune carte bancaire demandée.</p>
+        {phrasePaiement(site) && <p className="muted small center">Paiement par {phrasePaiement(site)}, au retrait ou à la livraison.</p>}
       </form>
     </Modal>
   );

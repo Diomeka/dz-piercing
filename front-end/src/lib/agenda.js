@@ -1,4 +1,5 @@
 import CONFIG from "../config.js";
+import { getSite } from "./site.js";
 
 /** Échappe le texte selon la norme iCalendar (RFC 5545) */
 const txt = (s) => String(s ?? "").replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/([,;])/g, "\\$1");
@@ -28,8 +29,8 @@ export function rendezVousIcs(rdv, dureeMinutes = CONFIG.dureeCreneau) {
     `DTSTART:${stamp(debut)}`,
     `DTEND:${stamp(fin)}`,
     `SUMMARY:${txt(`Piercing ${rdv.piercingNom} — ${CONFIG.nomBoutique}`)}`,
-    `LOCATION:${txt(CONFIG.adresse)}`,
-    `DESCRIPTION:${txt(`Référence ${rdv.reference}. En attente de confirmation par ${CONFIG.nomBoutique}.\nContact : ${CONFIG.telephone}`)}`,
+    `LOCATION:${txt(getSite().contact.adresse)}`,
+    `DESCRIPTION:${txt(`Référence ${rdv.reference}. En attente de confirmation par ${CONFIG.nomBoutique}.\nContact : ${getSite().contact.telephone}`)}`,
     "BEGIN:VALARM",
     "TRIGGER:-PT2H",
     "ACTION:DISPLAY",

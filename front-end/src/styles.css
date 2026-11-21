@@ -427,3 +427,73 @@ legend { font-weight: 600; font-size: 0.95rem; margin-bottom: 8px; }
   .tabs { flex-wrap: nowrap; }
   .tabs .tab { flex: 1 0 auto; padding: 8px 14px; }
 }
+
+/* ------------------------------ En-tête : bouton compte ------------------------------ */
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
+.compte-btn { min-height: 40px; padding: 6px 12px; }
+@media (max-width: 420px) { .compte-btn span { display: none; } .compte-btn { width: 44px; padding: 0; } }
+.sheet-sep { border-top: 1px solid var(--bord); border-radius: 0; margin-top: 8px; }
+
+/* ------------------------------ Interface admin (séparée) ------------------------------ */
+.admin-app { min-height: 100vh; }
+.admin-app .main, .admin-app main { padding-bottom: 48px; }
+.admin-brand { display: inline-flex; align-items: center; gap: 10px; }
+.admin-tag { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.14em; color: #111; background: var(--or-degrade); padding: 3px 8px; border-radius: 6px; }
+@media (max-width: 520px) {
+  .admin-bar .logo-txt { display: none; }
+  .admin-bar .btn-sm { padding: 6px 10px; font-size: 0.85rem; }
+}
+
+/* ------------------------------ Connexion / compte ------------------------------ */
+.auth { margin-top: 12px; }
+.auth .success-icon { margin-top: 6px; }
+.password { position: relative; display: block; }
+.password input { padding-right: 92px; }
+.password button { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 0.9rem; }
+.profil { display: flex; align-items: center; gap: 16px; }
+.small-icon { width: 56px; height: 56px; margin: 0; flex: none; }
+
+/* ------------------------------ Pied de page : réseaux + paiements ------------------------------ */
+.reseaux { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; margin: 16px 0 6px; }
+.reseau { width: 44px; height: 44px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--bord); color: var(--texte); transition: color 0.2s, border-color 0.2s, transform 0.2s; }
+.reseau:hover, .reseau:focus-visible { color: var(--or-texte); border-color: var(--or); transform: translateY(-2px); }
+.reseau-wa { min-height: 44px; border-radius: 999px; }
+
+.paiements { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 14px 0 4px; }
+.paiements-titre { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--texte-2); }
+.paiements-liste { list-style: none; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 0; padding: 0; }
+.paiement { position: relative; display: inline-flex; align-items: center; justify-content: center; min-width: 64px; height: 38px; padding: 0 10px; border-radius: 8px; background: #fff; color: #222; border: 1px solid rgba(0, 0, 0, 0.12); cursor: default; outline-offset: 3px; }
+.paiement img { max-height: 26px; max-width: 80px; object-fit: contain; }
+.paiement-texte { font-weight: 800; font-size: 0.85rem; letter-spacing: 0.01em; }
+.paiement-moncash .paiement-texte { color: #c8102e; }
+.paiement-natcash .paiement-texte { color: #0b57a4; }
+.paiement-virement { color: #8a6a12; }
+/* le nom apparaît au survol (souris) ou au toucher / clavier (focus) */
+.paiement::after {
+  content: attr(data-nom); position: absolute; bottom: calc(100% + 8px); left: 50%;
+  transform: translate(-50%, 4px); white-space: nowrap; pointer-events: none; opacity: 0;
+  background: var(--or-degrade); color: #111; font-size: 0.78rem; font-weight: 700;
+  padding: 5px 10px; border-radius: 8px; box-shadow: var(--ombre); transition: opacity 0.15s, transform 0.15s; z-index: 5;
+}
+.paiement:hover::after, .paiement:focus::after { opacity: 1; transform: translate(-50%, 0); }
+
+/* ------------------------------ Admin : onglet Site ------------------------------ */
+.reglages { display: grid; gap: 12px; }
+.reglage summary { gap: 10px; }
+.reglage summary .badge { margin-left: auto; margin-right: 12px; }
+.reglage-corps { padding: 0 18px 18px; }
+.menu-ligne, .horaire-ligne { display: grid; grid-template-columns: 130px 1fr; gap: 10px; align-items: center; }
+.menu-ligne .consent, .horaire-ligne .consent { margin: 0; }
+.horaire-heures { display: flex; align-items: center; gap: 8px; }
+.horaire-heures input { min-height: 46px; }
+.reseau-champ > span { display: inline-flex; align-items: center; gap: 8px; }
+.paiement-ligne { display: grid; gap: 10px; padding: 14px; box-shadow: none; }
+
+/* Barre admin sur téléphone : les 2 boutons tiennent côte à côte */
+.admin-bar .admin-head-actions { flex-wrap: nowrap; }
+@media (max-width: 520px) {
+  .admin-bar .topbar-inner { gap: 8px; }
+  .admin-bar .admin-head-actions { gap: 6px; }
+  .admin-bar .btn-sm { min-height: 38px; padding: 6px 9px; font-size: 0.8rem; gap: 5px; white-space: nowrap; }
+  .admin-bar .btn-sm svg { width: 16px; height: 16px; }
+}

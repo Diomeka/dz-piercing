@@ -13,35 +13,34 @@ galerie, conseils de soins, contact, et un espace admin protégé par mot de pas
 
 ## 🟡 Pour la propriétaire du salon (sans coder)
 
-### Lancer le site sur ton ordinateur
-1. Installe **Node.js** (version LTS) : https://nodejs.org → « Télécharger » → suivant, suivant, terminer.
-2. Ouvre le dossier `front-end`, clique dans la barre d'adresse de l'explorateur Windows, tape `cmd` puis Entrée.
-3. Dans la fenêtre noire, tape (une seule fois) :
-   ```
-   npm install
-   ```
-4. Puis, à chaque fois que tu veux voir le site :
-   ```
-   npm run dev
-   ```
-5. Ouvre l'adresse affichée `http://localhost:5173` dans ton navigateur.
+### Lancer le site sur ton ordinateur (Windows)
+**Double-clique sur `Lancer le site.bat`** (à la racine du projet). C'est tout :
+- s'il manque **Node.js**, la page de téléchargement s'ouvre (choisis « LTS », installe, relance le fichier) ;
+- sinon il installe / met à jour tout seul ce dont le site a besoin, puis ouvre le site dans ton navigateur.
+- Pour arrêter le site : ferme la fenêtre noire.
 
 ### Tester sur ton téléphone
 - Ton téléphone et ton ordinateur doivent être sur **le même Wi-Fi**.
-- Après `npm run dev`, regarde la ligne **`Network: http://192.168.x.x:5173`** et tape cette adresse dans le navigateur du téléphone.
+- Dans la fenêtre noire, regarde la ligne **`Network: http://192.168.x.x:5173`** et tape cette adresse dans le navigateur du téléphone.
 - Si rien ne s'affiche, Windows te demande peut-être d'autoriser Node.js dans le pare-feu : clique **Autoriser**.
 - Pour l'avoir comme une appli : menu du navigateur → **« Ajouter à l'écran d'accueil »**.
 
-### Modifier tes infos (téléphone, WhatsApp, adresse, horaires)
-Ouvre `front-end/src/config.js` avec le Bloc-notes, change le texte entre guillemets, enregistre.
+### Interface admin (séparée du site)
+- Sur le site, appuie sur **Connexion** (en haut à droite, ou menu « Plus » sur téléphone) et connecte-toi
+  avec l'**e-mail admin**. Tu arrives directement dans l'interface admin.
+  - Mode démo : `admin@dzpiercing.ht` / `dz2026` (dans `front-end/src/config.js`).
+- Dans l'admin : bouton **« Voir le site »** pour revenir au site, **« Déconnexion »** pour sortir.
+- Onglets : **RDV**, **Commandes** (accepter / refuser, prévenir le client sur WhatsApp),
+  **Piercings**, **Bracelets** (ajouter / modifier / supprimer avec photo, nom, prix), **Galerie**, et
+  **Site** : tout ce qui se modifie **sans toucher au code** :
+  page d'accueil (photo, phrase, points forts), menus (afficher / masquer / renommer), contact,
+  horaires, réseaux sociaux, moyens de paiement (MonCash, NatCash, virement + logos), devise
+  (dollar ou gourde), informations légales (nom, NIF).
 
-### Espace admin
-- Accès : il n'y a **aucun lien visible** pour les clients. Ouvre directement
-  **https://diomeka.github.io/dz-piercing/#/admin** (en local : http://localhost:5173/#/admin)
-  et **ajoute la page à tes favoris** (ou à l'écran d'accueil de ton téléphone).
-- Mot de passe de démo : `dz2026` (modifiable dans `config.js`).
-- Tu peux : ajouter/modifier/supprimer piercings et bracelets (avec photo), accepter/refuser
-  rendez-vous et commandes (puis prévenir le client sur WhatsApp en un clic), gérer la galerie.
+### Comptes clients
+- Les clients peuvent **créer un compte** (nom, e-mail, téléphone, mot de passe) et se connecter.
+- Dans **« Mon compte »** ils voient **uniquement** leurs rendez-vous et leurs commandes, avec le statut.
+- On peut toujours réserver ou commander **sans compte**.
 
 > ⚠️ **Mode démo** : tant que le backend n'est pas branché, les données sont enregistrées
 > **uniquement dans le navigateur** de l'appareil utilisé. Un rendez-vous pris sur le téléphone
@@ -83,13 +82,15 @@ statique sans réécriture d'URL), Vite 8, CSS pur (`src/styles.css`, variables 
 
 ```
 front-end/src/
-├── config.js           ← infos du salon + apiUrl (vide = mode démo)
+├── config.js           ← valeurs de DÉPART (contact, horaires…) + apiUrl (vide = mode démo)
 ├── api/index.js        ← TOUTE la communication données (démo localStorage OU API REST)
 ├── data/seed.js        ← données d'exemple (prix fictifs)
 ├── lib/                ← formatage, créneaux horaires, images d'attente
 ├── components/         ← Layout (nav), Modal, Toast, Icon, useData
+├── lib/site.js         ← contenu modifiable depuis l'admin (onglet Site) + hook useSite()
 └── pages/              ← Accueil, Piercings, Bracelets, RendezVous, Galerie, Soins, Contact
-    └── admin/          ← Connexion, Demandes (RDV/commandes), Catalogue, GalerieAdmin
+    ├── compte/         ← Connexion (admin + client), Inscription, Mon compte
+    └── admin/          ← interface admin SÉPARÉE : Demandes, Catalogue, GalerieAdmin, Reglages (Site)
 ```
 
 **Brancher le backend** : remplir `apiUrl` dans `front-end/src/config.js`

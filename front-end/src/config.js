@@ -7,23 +7,25 @@ const CONFIG = {
   nomBoutique: "DZ PIERCING",
   slogan: "Piercing & bijoux — style, précision, hygiène.",
 
-  // Numéro WhatsApp au format international, SANS le + ni les espaces
-  // Exemple pour la France : 06 12 34 56 78  →  "33612345678"
-  whatsapp: "33600000000",
+  // Numéro WhatsApp au format international, SANS le +, les espaces ni les tirets
+  // Exemple Haïti : 3712-3456  →  "50937123456"
+  whatsapp: "50937000000",
 
   // Numéro pour le bouton "Appeler"
-  telephone: "+33 6 00 00 00 00",
+  telephone: "+509 3700-0000",
 
   instagram: "https://www.instagram.com/dzpiercing",
   tiktok: "https://www.tiktok.com/@dzpiercing",
 
-  adresse: "12 rue de l'Exemple, 75000 Paris",
+  adresse: "12 rue de l'Exemple, Pétion-Ville, Haïti",
 
-  // Informations légales (obligatoires en France, affichées sur la page
-  // "Mentions légales & confidentialité")
-  responsable: "Prénom NOM",            // ton nom (ou le nom de ta société)
-  siret: "000 000 000 00000",           // ton numéro SIRET
-  emailContact: "contact@exemple.fr",   // e-mail pour les demandes RGPD
+  // Code pays (ISO) : "HT" = Haïti. Utilisé pour la fiche Google.
+  pays: "HT",
+
+  // Informations légales (affichées sur la page "Mentions légales & confidentialité")
+  responsable: "Prénom NOM",            // ton nom (ou le nom de ton entreprise)
+  nif: "000-000-000-0",                 // ton NIF (Numéro d'Identification Fiscale, DGI)
+  emailContact: "contact@exemple.ht",   // e-mail de contact (questions sur les données)
 
   // Horaires d'ouverture (0 = dimanche, 1 = lundi, ... 6 = samedi)
   // null = fermé ce jour-là
@@ -44,7 +46,7 @@ const CONFIG = {
   // Modifiable ensuite par l'admin dans l'onglet « Réglages ».
   devise: "USD",
 
-  // Photo de la page d'accueil (remplace par "ma-photo.jpg" (placée dans le dossier public))
+  // Photo de la page d'accueil (mets ta photo dans le dossier public, ex. "ma-photo.jpg")
   photoAccueil: "hero.svg",
 
   /* ----------------------------------------------------------------------
@@ -57,8 +59,9 @@ const CONFIG = {
   // (fichier front-end/.env, voir .env.example) sans modifier ce fichier.
   apiUrl: import.meta.env?.VITE_API_URL || "",
 
-  // Mot de passe admin du MODE DÉMO uniquement.
-  // En production, le mot de passe est vérifié par le serveur.
+  // Compte admin du MODE DÉMO uniquement (e-mail + mot de passe).
+  // En production, les comptes sont gérés et vérifiés par le serveur.
+  emailAdminDemo: "admin@dzpiercing.ht",
   motDePasseDemo: "dz2026",
 };
 export default CONFIG;

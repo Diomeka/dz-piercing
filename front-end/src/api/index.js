@@ -13,7 +13,8 @@ import CONFIG from "../config.js";
 import SEED from "../data/seed.js";
 
 const DB_KEY = "dz_piercing_db_v1";
-const TOKEN_KEY = "dz_admin_token";
+const SESSION_KEY = "dz_session";
+const TOKEN_KEY = "dz_admin_token"; // ancienne clé (avant les comptes) — effacée au démarrage
 
 /* ---------- stockage navigateur sécurisé (navigation privée, quota…) ---------- */
 const memory = {};
@@ -37,27 +38,77 @@ const storage = {
   },
 };
 
-export const getToken = () => storage.get(TOKEN_KEY);
+/* ---------------------------------------------------------------------------
+   SESSION : { token, user: { id, nom, email, telephone, role: "admin"|"client" } }
+   Une seule connexion pour tout le monde : le rôle décide où l'on arrive
+   (admin → interface admin, client → « Mon compte »).
+   --------------------------------------------------------------------------- */
+const listeners = new Set();
+function lireSession() {
+  try { return JSON.parse(storage.get(SESSION_KEY) || "null"); } catch { return null; }
+}
+let session = lireSession();
+storage.remove(TOKEN_KEY); // ancienne version (mot de passe seul) : on repart propre
+
+function setSession(s) {
+  session = s;
+  if (s) storage.set(SESSION_KEY, JSON.stringify(s));
+  else storage.remove(SESSION_KEY);
+  listeners.forEach((fn) => fn());
+}
+/** Pour React (useSyncExternalStore) : être prévenu quand on se connecte / déconnecte */
+export const onSessionChange = (fn) => { listeners.add(fn); return () => listeners.delete(fn); };
+export const getSession = () => session;
+export const getToken = () => session?.token || null;
+export const getUser = () => session?.user || null;
 export const isLoggedIn = () => !!getToken();
-export const logout = () => storage.remove(TOKEN_KEY);
+export const isAdmin = () => getUser()?.role === "admin";
+export const isClient = () => getUser()?.role === "client";
+export const logout = () => setSession(null);
 
 /* =============================== MODE DÉMO =============================== */
 function loadDb() {
   const raw = storage.get(DB_KEY);
   if (raw) {
-    try { return JSON.parse(raw); } catch { /* données corrompues : on repart de zéro */ }
+    try {
+      const db = JSON.parse(raw);
+      // nouvelles collections ajoutées depuis (ex. utilisateurs) : on complète
+      for (const k of Object.keys(SEED)) if (!(k in db)) db[k] = structuredClone(SEED[k]);
+      return db;
+    } catch { /* données corrompues : on repart de zéro */ }
   }
   const db = structuredClone(SEED);
   storage.set(DB_KEY, JSON.stringify(db));
   return db;
 }
+
+/** Empreinte du mot de passe — MODE DÉMO SEULEMENT (le vrai serveur utilise bcrypt).
+ *  Volontairement simple : crypto.subtle n'existe pas en http:// (test sur le Wi-Fi). */
+function empreinte(motDePasse) {
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  const s = "dz-piercing:" + motDePasse;
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 2654435761);
+    h2 = Math.imul(h2 ^ c, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (h2 >>> 0).toString(16).padStart(8, "0") + (h1 >>> 0).toString(16).padStart(8, "0");
+}
+const sansMotDePasse = ({ mdp: _mdp, ...u }) => u;
+const normEmail = (e) => String(e || "").trim().toLowerCase();
+const EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const saveDb = (db) => storage.set(DB_KEY, JSON.stringify(db));
 const wait = (v) => new Promise((r) => setTimeout(() => r(structuredClone(v)), 120));
 const newId = (p) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 const newRef = () => "DZ-" + Math.random().toString(36).slice(2, 7).toUpperCase();
 
 function requireAdmin() {
-  if (!isLoggedIn()) throw new Error("Session expirée, reconnecte-toi.");
+  if (!isAdmin()) throw new Error("Accès réservé à l'administrateur. Reconnecte-toi.");
+}
+function requireClient() {
+  if (!isClient()) throw new Error("Connecte-toi à ton compte.");
 }
 
 function crud(collection, prefix) {
@@ -135,11 +186,43 @@ function statusApi(collection) {
 
 const demoApi = {
   mode: "demo",
-  login: async (password) => {
+  /** Connexion unique (admin OU client). Renvoie l'utilisateur ({ role, … }). */
+  login: async (email, motDePasse) => {
     await wait(null);
-    if (password !== CONFIG.motDePasseDemo) throw new Error("Mot de passe incorrect.");
-    storage.set(TOKEN_KEY, "demo-token");
-    return true;
+    const e = normEmail(email);
+    if (e === normEmail(CONFIG.emailAdminDemo) && motDePasse === CONFIG.motDePasseDemo) {
+      const user = { id: "admin", nom: "Admin", email: e, role: "admin" };
+      setSession({ token: "demo:admin", user });
+      return user;
+    }
+    const u = loadDb().utilisateurs.find((x) => x.email === e);
+    if (!u || u.mdp !== empreinte(motDePasse)) throw new Error("E-mail ou mot de passe incorrect.");
+    const user = sansMotDePasse(u);
+    setSession({ token: `demo:${u.id}`, user });
+    return user;
+  },
+  /** Création d'un compte client, puis connexion automatique. */
+  register: async ({ nom, email, telephone, motDePasse }) => {
+    await wait(null);
+    const e = normEmail(email);
+    if (!String(nom || "").trim()) throw new Error("Écris ton nom.");
+    if (!EMAIL_OK.test(e)) throw new Error("Adresse e-mail invalide.");
+    if (String(motDePasse || "").length < 8) throw new Error("Le mot de passe doit faire au moins 8 caractères.");
+    const db = loadDb();
+    if (e === normEmail(CONFIG.emailAdminDemo) || db.utilisateurs.some((x) => x.email === e)) {
+      throw new Error("Un compte existe déjà avec cet e-mail. Connecte-toi.");
+    }
+    const u = { id: newId("u"), nom: nom.trim(), email: e, telephone: String(telephone || "").trim(), role: "client", mdp: empreinte(motDePasse), creeLe: new Date().toISOString() };
+    db.utilisateurs.push(u);
+    saveDb(db);
+    const user = sansMotDePasse(u);
+    setSession({ token: `demo:${u.id}`, user });
+    return user;
+  },
+  /** Espace client : uniquement SES rendez-vous et SES commandes. */
+  moi: {
+    rendezvous: async () => { requireClient(); return wait(loadDb().rendezvous.filter((r) => r.clientId === getUser().id)); },
+    commandes: async () => { requireClient(); return wait(loadDb().commandes.filter((c) => c.clientId === getUser().id)); },
   },
   piercings: crud("piercings", "p"),
   bracelets: crud("bracelets", "b"),
@@ -154,7 +237,10 @@ const demoApi = {
       if (db.rendezvous.some((r) => r.date === data.date && r.heure === data.heure && r.statut !== "refused")) {
         throw new Error("Ce créneau vient d'être pris, choisis-en un autre.");
       }
-      const item = { ...data, id: newId("r"), reference: newRef(), statut: "pending", creeLe: new Date().toISOString() };
+      const item = {
+        ...data, id: newId("r"), reference: newRef(), statut: "pending", creeLe: new Date().toISOString(),
+        clientId: isClient() ? getUser().id : null, // relié au compte si le client est connecté
+      };
       db.rendezvous.unshift(item);
       saveDb(db);
       return wait(item);
@@ -169,6 +255,7 @@ const demoApi = {
       const item = {
         ...data, id: newId("c"), reference: newRef(), braceletNom: b.nom, prixUnitaire: b.prix,
         total: b.prix * data.quantite, statut: "pending", creeLe: new Date().toISOString(),
+        clientId: isClient() ? getUser().id : null,
       };
       db.commandes.unshift(item);
       saveDb(db);
@@ -233,10 +320,21 @@ const restStatus = (path) => ({
 
 const restApi = {
   mode: "api",
-  login: async (password) => {
-    const { token } = await http("POST", "/auth/login", { password });
-    storage.set(TOKEN_KEY, token);
-    return true;
+  login: async (email, motDePasse) => {
+    const { token, user } = await http("POST", "/auth/login", { email: normEmail(email), password: motDePasse });
+    setSession({ token, user });
+    return user;
+  },
+  register: async ({ nom, email, telephone, motDePasse }) => {
+    const { token, user } = await http("POST", "/auth/register", {
+      nom: String(nom || "").trim(), email: normEmail(email), telephone, password: motDePasse,
+    });
+    setSession({ token, user });
+    return user;
+  },
+  moi: {
+    rendezvous: () => http("GET", "/moi/rendezvous"),
+    commandes: () => http("GET", "/moi/commandes"),
   },
   piercings: restCrud("/piercings"),
   bracelets: restCrud("/bracelets"),

@@ -3,7 +3,7 @@ import api from "../../api/index.js";
 import useData, { Chargement, Erreur } from "../../components/useData.jsx";
 import Icon from "../../components/Icon.jsx";
 import { useToast } from "../../components/Toast.jsx";
-import { STATUTS, formatDate, formatPrix } from "../../lib/format.js";
+import { STATUTS, formatDate, formatPrix, versWhatsApp } from "../../lib/format.js";
 
 const FILTRES = [
   { id: "pending", label: "En attente" },
@@ -11,14 +11,6 @@ const FILTRES = [
   { id: "refused", label: "Refusés" },
   { id: "all", label: "Tous" },
 ];
-
-/** Numéro FR "06 12 34 56 78" → "33612345678" pour wa.me */
-function versWhatsApp(tel) {
-  let n = String(tel).replace(/\D/g, "");
-  if (n.startsWith("00")) n = n.slice(2);
-  else if (n.startsWith("0")) n = "33" + n.slice(1);
-  return n;
-}
 
 function messageClient(type, item, statut) {
   if (type === "rendezvous") {

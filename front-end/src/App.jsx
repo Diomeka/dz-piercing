@@ -8,12 +8,15 @@ import RendezVous from "./pages/RendezVous.jsx";
 import Galerie from "./pages/Galerie.jsx";
 import Soins from "./pages/Soins.jsx";
 import Contact from "./pages/Contact.jsx";
+import NotFound from "./pages/NotFound.jsx";
+import Confidentialite from "./pages/Confidentialite.jsx";
+import Connexion from "./pages/compte/Connexion.jsx";
+import Inscription from "./pages/compte/Inscription.jsx";
+import Compte from "./pages/compte/Compte.jsx";
 import { Chargement } from "./components/useData.jsx";
 
 // L'admin n'est téléchargé que si on l'ouvre : le site reste léger pour les clients
 const Admin = lazy(() => import("./pages/admin/Admin.jsx"));
-import NotFound from "./pages/NotFound.jsx";
-import Confidentialite from "./pages/Confidentialite.jsx";
 
 export default function App() {
   const { pathname } = useLocation();
@@ -23,6 +26,7 @@ export default function App() {
 
   return (
     <Routes>
+      {/* SITE CLIENT */}
       <Route element={<Layout />}>
         <Route index element={<Accueil />} />
         <Route path="piercings" element={<Piercings />} />
@@ -32,9 +36,14 @@ export default function App() {
         <Route path="soins" element={<Soins />} />
         <Route path="contact" element={<Contact />} />
         <Route path="confidentialite" element={<Confidentialite />} />
-        <Route path="admin" element={<Suspense fallback={<Chargement />}><Admin /></Suspense>} />
+        <Route path="connexion" element={<Connexion />} />
+        <Route path="inscription" element={<Inscription />} />
+        <Route path="compte" element={<Compte />} />
         <Route path="*" element={<NotFound />} />
       </Route>
+
+      {/* INTERFACE ADMIN — séparée : pas de menus clients, bouton « Voir le site » */}
+      <Route path="admin" element={<Suspense fallback={<Chargement />}><Admin /></Suspense>} />
     </Routes>
   );
 }

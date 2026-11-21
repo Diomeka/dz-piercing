@@ -55,13 +55,16 @@ const SEED = {
 
   rendezvous: [
     { id: "r1", reference: "DZ-A7K2P", piercingId: "p2", piercingNom: "Hélix", date: "2026-12-02", heure: "14:30",
-      nom: "Sarah B.", telephone: "06 11 22 33 44", message: "Premier piercing cartilage 🙂", statut: "pending",
+      nom: "Sarah B.", telephone: "3711-2233", message: "Premier piercing cartilage 🙂", statut: "pending",
       creeLe: "2026-11-20T10:12:00" },
   ],
 
+  // Comptes clients (créés via « Créer un compte »)
+  utilisateurs: [],
+
   commandes: [
     { id: "c1", reference: "DZ-Q9M4T", braceletId: "b1", braceletNom: "Chaîne Cubaine", couleur: "Doré", quantite: 2,
-      prixUnitaire: 29, total: 58, nom: "Yanis K.", telephone: "07 55 66 77 88", message: "", statut: "pending",
+      prixUnitaire: 29, total: 58, nom: "Yanis K.", telephone: "4855-6677", message: "", statut: "pending",
       creeLe: "2026-11-19T18:40:00" },
   ],
 };

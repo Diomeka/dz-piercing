@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-/** Case à cocher RGPD obligatoire avant d'envoyer nom + téléphone. */
+/** Case d'accord obligatoire avant d'envoyer nom + téléphone (protection des données). */
 export default function Consentement({ checked, onChange }) {
   return (
     <label className="consent">

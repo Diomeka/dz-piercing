@@ -1,20 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import CONFIG from "../config.js";
+import { PAGES_MENU, useSite } from "../lib/site.js";
 import Icon from "./Icon.jsx";
 import ErrorBoundary from "./ErrorBoundary.jsx";
-
-const PRINCIPAUX = [
-  { to: "/", label: "Accueil", icon: "home", end: true },
-  { to: "/piercings", label: "Piercings", icon: "needle" },
-  { to: "/bracelets", label: "Bracelets", icon: "bag" },
-  { to: "/rendez-vous", label: "RDV", icon: "calendar" },
-];
-const SECONDAIRES = [
-  { to: "/galerie", label: "Galerie", icon: "image" },
-  { to: "/soins", label: "Soins après piercing", icon: "heart" },
-  { to: "/contact", label: "Contact", icon: "phone" },
-];
+import LiensReseaux from "./Reseaux.jsx";
+import Paiements from "./Paiements.jsx";
+import useSession from "./useSession.js";
 
 export function Logo({ size = "md" }) {
   return (
@@ -34,11 +26,35 @@ const TITRES = {
   "/soins": "Soins après piercing",
   "/contact": "Contact",
   "/confidentialite": "Mentions légales",
-  "/admin": "Admin",
+  "/connexion": "Connexion",
+  "/inscription": "Créer un compte",
+  "/compte": "Mon compte",
 };
+
+/** Bouton du compte en haut à droite : Connexion / Mon compte / Admin (si admin). */
+function BoutonCompte({ compact }) {
+  const { user, isAdmin } = useSession();
+  const [to, label, icon] = isAdmin
+    ? ["/admin", "Admin", "lock"]
+    : user ? ["/compte", "Mon compte", "user"] : ["/connexion", "Connexion", "user"];
+  return (
+    <Link to={to} className={`btn btn-outline btn-sm compte-btn ${compact ? "compte-btn-compact" : ""}`} aria-label={label}>
+      <Icon name={icon} size={18} /> <span>{label}</span>
+    </Link>
+  );
+}
 
 export default function Layout() {
   const { pathname } = useLocation();
+  const site = useSite();
+
+  // Menus choisis par l'admin (onglet Site → Menus)
+  const pages = PAGES_MENU.filter((p) => site.menus[p.id]?.visible !== false).map((p) => ({
+    ...p, label: site.menus[p.id]?.label?.trim() || p.label,
+  }));
+  const principaux = [{ id: "accueil", to: "/", label: "Accueil", icon: "home", end: true }, ...pages.filter((p) => p.principal)];
+  const secondaires = pages.filter((p) => !p.principal);
+  const rdvVisible = pages.some((p) => p.id === "rendez-vous");
 
   // Titre de l'onglet du navigateur (et de l'historique) selon la page
   useEffect(() => {
@@ -49,7 +65,8 @@ export default function Layout() {
   const [menuOuvertSur, setMenuOuvertSur] = useState(null);
   const menuOuvert = menuOuvertSur === pathname;
   const setMenuOuvert = (ouvert) => setMenuOuvertSur(ouvert ? pathname : null);
-  const surSecondaire = SECONDAIRES.some((l) => pathname.startsWith(l.to)) || pathname.startsWith("/admin");
+  const surSecondaire = secondaires.some((l) => pathname.startsWith(l.to))
+    || ["/compte", "/connexion", "/inscription"].includes(pathname);
 
   return (
     <div className="app">
@@ -57,11 +74,14 @@ export default function Layout() {
         <div className="container topbar-inner">
           <Link to="/" aria-label="Accueil DZ PIERCING"><Logo /></Link>
           <nav className="desk-nav" aria-label="Navigation principale">
-            {[...PRINCIPAUX, ...SECONDAIRES].map((l) => (
-              <NavLink key={l.to} to={l.to} end={l.end}>{l.label === "Soins après piercing" ? "Soins" : l.label}</NavLink>
+            {[...principaux, ...secondaires].map((l) => (
+              <NavLink key={l.to} to={l.to} end={l.end}>{l.id === "soins" && l.label === "Soins après piercing" ? "Soins" : l.label}</NavLink>
             ))}
           </nav>
-          <Link to="/rendez-vous" className="btn btn-gold btn-sm desk-only">Prendre RDV</Link>
+          <div className="topbar-actions">
+            <BoutonCompte />
+            {rdvVisible && <Link to="/rendez-vous" className="btn btn-gold btn-sm desk-only">Prendre RDV</Link>}
+          </div>
         </div>
       </header>
 
@@ -75,10 +95,10 @@ export default function Layout() {
       <footer className="footer">
         <div className="container">
           <Logo size="sm" />
-          <p>{CONFIG.adresse}</p>
+          <p>{site.contact.adresse}</p>
+          <LiensReseaux className="footer-reseaux" />
+          <Paiements className="footer-paiements" />
           <p className="footer-links">
-            <a href={CONFIG.instagram} target="_blank" rel="noreferrer">Instagram</a>
-            <a href={CONFIG.tiktok} target="_blank" rel="noreferrer">TikTok</a>
             <Link to="/confidentialite">Mentions légales & confidentialité</Link>
           </p>
           <p className="muted small">© {new Date().getFullYear()} {CONFIG.nomBoutique}</p>
@@ -86,8 +106,8 @@ export default function Layout() {
       </footer>
 
       {/* Barre du bas (mobile) */}
-      <nav className="bottom-nav" aria-label="Navigation mobile">
-        {PRINCIPAUX.map((l) => (
+      <nav className="bottom-nav" aria-label="Navigation mobile" style={{ gridTemplateColumns: `repeat(${principaux.length + 1}, 1fr)` }}>
+        {principaux.map((l) => (
           <NavLink key={l.to} to={l.to} end={l.end}>
             <Icon name={l.icon} />
             <span>{l.label}</span>
@@ -103,16 +123,23 @@ export default function Layout() {
         <div className="sheet-backdrop" onClick={() => setMenuOuvert(false)}>
           <div className="sheet" onClick={(e) => e.stopPropagation()}>
             <div className="sheet-handle" />
-            {SECONDAIRES.map((l) => (
+            {secondaires.map((l) => (
               <NavLink key={l.to} to={l.to} className="sheet-link">
                 <Icon name={l.icon} /> {l.label}
               </NavLink>
             ))}
-            {/* Pas de lien vers l'admin pour les clients : la propriétaire y accède
-                par l'adresse directe …/#/admin (à garder en favori). */}
+            <SheetCompte />
           </div>
         </div>
       )}
     </div>
   );
+}
+
+function SheetCompte() {
+  const { user, isAdmin } = useSession();
+  if (isAdmin) return <NavLink to="/admin" className="sheet-link sheet-sep"><Icon name="lock" /> Interface admin</NavLink>;
+  return user
+    ? <NavLink to="/compte" className="sheet-link sheet-sep"><Icon name="user" /> Mon compte</NavLink>
+    : <NavLink to="/connexion" className="sheet-link sheet-sep"><Icon name="user" /> Connexion / Créer un compte</NavLink>;
 }

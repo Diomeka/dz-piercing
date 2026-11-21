@@ -6,7 +6,10 @@ sur le disque `public` (ou S3).
 
 Le front passe en mode API dès que `apiUrl` est renseigné dans `front-end/src/config.js`
 (ou via `VITE_API_URL` dans `front-end/.env` pour le développement local — voir `.env.example`).
-Toutes les URL ci-dessous sont relatives à `apiUrl` (ex. `https://api.dzpiercing.fr/api`).
+Toutes les URL ci-dessous sont relatives à `apiUrl` (ex. `https://api.dzpiercing.ht/api`).
+
+> Pour voir le comportement attendu sans serveur : le **mode démo** du front
+> (`front-end/src/api/index.js`, objet `demoApi`) simule exactement ce contrat dans le navigateur.
 
 ## Généralités
 
@@ -14,21 +17,45 @@ Toutes les URL ci-dessous sont relatives à `apiUrl` (ex. `https://api.dzpiercin
 - Réponses : l'objet/tableau **brut** OU enveloppé `{ "data": ... }` (API Resources Laravel) — les deux sont acceptés.
 - Erreurs : code HTTP ≥ 400 avec `{ "message": "Texte lisible en français" }`.
   Le message est affiché tel quel à l'utilisateur (les erreurs 422 Laravel conviennent).
-- Auth admin : en-tête `Authorization: Bearer <token>`. Un **401** déconnecte l'admin côté front.
+- Auth : en-tête `Authorization: Bearer <token>` (admin **ou** client). Un **401** déconnecte côté front.
+  Les routes « admin » doivent renvoyer **403** à un client connecté.
 - `DELETE` peut répondre `204 No Content`.
 - **CORS** : autoriser l'origine du front (GitHub Pages / domaine final) et l'en-tête `Authorization`
   (`config/cors.php`).
 - Les noms de champs sont en français et doivent être **identiques** (camelCase).
 - Les `id` peuvent être des nombres ou des chaînes.
 
-## Authentification
+## Comptes et authentification
+
+Une seule page de connexion pour tout le monde (e-mail + mot de passe). Le **rôle** renvoyé
+décide de la suite côté front : `admin` → interface admin, `client` → « Mon compte ».
+
+Objet `user` (jamais de mot de passe dedans) :
+
+```json
+{ "id": 7, "nom": "Inès Client", "email": "ines@mail.ht", "telephone": "3712-3456", "role": "client" }
+```
 
 | Méthode | URL | Accès | Corps | Réponse |
 |---|---|---|---|---|
-| POST | `/auth/login` | public | `{ "password": "..." }` | `{ "token": "..." }` |
+| POST | `/auth/login` | public | `{ "email": "...", "password": "..." }` | `{ "token": "...", "user": { … } }` |
+| POST | `/auth/register` | public | `{ "nom", "email", "telephone", "password" }` | `{ "token": "...", "user": { … "role": "client" } }` (201) |
 
-Un seul compte admin (la propriétaire). Mot de passe hashé côté serveur, jamais dans le front.
-Prévoir un rate-limit (ex. `throttle:5,1`).
+- Table `users` avec une colonne `role` (`admin` | `client`). Le compte admin (la propriétaire) est
+  créé par un seeder — **jamais** via `/auth/register`, qui crée toujours un `client`.
+- E-mail normalisé en minuscules, unique (sinon 422 « Un compte existe déjà avec cet e-mail. Connecte-toi. »).
+- Mot de passe : 8 caractères minimum, hashé (bcrypt, `Hash::make`). Message d'erreur de connexion
+  volontairement vague : « E-mail ou mot de passe incorrect. »
+- Rate-limit sur les deux routes (ex. `throttle:5,1`).
+- Mot de passe oublié : pour l'instant le front renvoie vers WhatsApp. Un vrai parcours par e-mail
+  pourra être ajouté plus tard (nécessite l'envoi d'e-mails côté serveur).
+
+### Espace client — `/moi`
+
+| Méthode | URL | Accès | Réponse |
+|---|---|---|---|
+| GET | `/moi/rendezvous` | client | uniquement les rendez-vous dont `clientId` = l'utilisateur connecté |
+| GET | `/moi/commandes` | client | uniquement ses commandes |
 
 ## Piercings — `/piercings`
 
@@ -94,12 +121,17 @@ Conseil : redimensionner à ~1200 px côté serveur (Intervention Image).
   "date": "2026-12-02",              // AAAA-MM-JJ
   "heure": "14:30",                  // HH:MM
   "nom": "Sarah B.",
-  "telephone": "06 11 22 33 44",
+  "telephone": "3711-2233",
   "message": "",
   "statut": "pending",               // "pending" | "accepted" | "refused"
-  "creeLe": "2026-11-20T10:12:00Z"   // ISO 8601
+  "creeLe": "2026-11-20T10:12:00Z",  // ISO 8601
+  "clientId": 7                      // id du compte client si connecté au moment de la demande, sinon null
 }
 ```
+
+`POST /rendezvous` et `POST /commandes` restent **publics** (on peut réserver sans compte).
+Si un jeton **client** est envoyé, le serveur remplit `clientId` avec cet utilisateur (ne jamais le
+prendre dans le corps de la requête).
 
 | Méthode | URL | Accès | Détails |
 |---|---|---|---|
@@ -111,12 +143,11 @@ Conseil : redimensionner à ~1200 px côté serveur (Intervention Image).
 
 Validations serveur attendues (POST) :
 - `piercingId` existe ; `piercingNom` peut être recalculé depuis la base.
-- date ≥ aujourd'hui (≤ +90 jours), jour ouvert et heure dans les horaires (voir `horaires` et
-  `dureeCreneau` dans `front-end/src/config.js` — à dupliquer côté serveur ou à exposer via un
-  endpoint de configuration).
+- date ≥ aujourd'hui (≤ +90 jours), jour ouvert et heure dans les horaires (bloc `horaires` de
+  `/reglages`, créneaux de 30 min — `dureeCreneau` dans `front-end/src/config.js`).
 - **Créneau libre** (aucun RDV non refusé à la même date/heure) → sinon **409** avec
   `{ "message": "Ce créneau vient d'être pris, choisis-en un autre." }`. Contrainte unique ou verrou transactionnel conseillé.
-- `telephone` : au moins 10 chiffres. Rate-limit anti-spam (ex. `throttle:10,1`).
+- `telephone` : au moins 8 chiffres (Haïti : 8 chiffres, ex. 3712-3456 ; +509 accepté). Rate-limit anti-spam (ex. `throttle:10,1`).
 
 ## Commandes — `/commandes`
 
@@ -131,7 +162,7 @@ Validations serveur attendues (POST) :
   "prixUnitaire": 29,                // calculé par le serveur (ne jamais faire confiance au front)
   "total": 58,                       // calculé par le serveur
   "nom": "Yanis K.",
-  "telephone": "07 55 66 77 88",
+  "telephone": "4855-6677",
   "message": "",
   "statut": "pending",
   "creeLe": "2026-11-19T18:40:00Z"
@@ -147,17 +178,35 @@ Validations serveur attendues (POST) :
 
 ## Réglages du site — `/reglages`
 
-Un seul objet de réglages (pas une liste). Pour l'instant : la devise des prix,
-choisie par la propriétaire dans l'onglet admin « Réglages ».
+Un seul objet (pas une liste) : tout ce que la propriétaire modifie dans l'onglet admin **« Site »**
+sans toucher au code. Le front le lit au démarrage et l'applique partout.
 
 ```json
-{ "devise": "USD" }   // "USD" (dollar américain) | "HTG" (gourde haïtienne)
+{
+  "devise": "USD",                                   // "USD" | "HTG"
+  "accueil": {
+    "slogan": "Piercing & bijoux — style, précision, hygiène.",
+    "photo": "https://…/accueil.jpg",                // URL renvoyée par /uploads (ou "hero.svg" = image par défaut)
+    "atouts": [ { "titre": "Matériel stérile", "texte": "Usage unique" }, … ],   // 3 éléments
+    "afficherPiercings": true,
+    "afficherBracelets": true
+  },
+  "contact": { "whatsapp": "3712-3456", "telephone": "+509 3712-3456", "adresse": "…", "emailContact": "…" },
+  "horaires": { "0": null, "1": null, "2": ["10:00", "19:00"], …, "6": ["10:00", "20:00"] },  // 0 = dimanche
+  "reseaux": { "instagram": "https://…", "tiktok": "", "facebook": "", "snapchat": "", "x": "" },
+  "menus": { "piercings": { "visible": true, "label": "Piercings" }, "galerie": { "visible": false, "label": "Galerie" }, … },
+  "paiements": { "moncash": { "actif": true, "logo": "https://…" }, "natcash": { … }, "virement": { … } },
+  "legal": { "responsable": "…", "nif": "…" }
+}
 ```
 
 | Méthode | URL | Accès | Détails |
 |---|---|---|---|
-| GET | `/reglages` | **public** | lu au chargement du site, avant l'affichage des prix. Valeur par défaut si rien n'est enregistré : `{ "devise": "USD" }` |
-| PUT | `/reglages` | admin | corps `{ "devise": "HTG" }` → renvoie l'objet complet. Refuser (422) toute autre valeur que `USD` / `HTG`. |
+| GET | `/reglages` | **public** | renvoie l'objet enregistré (même partiel : le front complète avec ses valeurs par défaut). `{}` si rien n'est enregistré. |
+| PUT | `/reglages` | admin | corps = **un ou plusieurs blocs** (ex. `{ "contact": { … } }`). Fusionner au niveau des blocs (remplacer le bloc reçu, garder les autres) et renvoyer l'objet complet. |
+
+Conseil : une table `reglages` avec une colonne JSON suffit. Valider `devise` ∈ {USD, HTG} et les
+URL (`reseaux`, `photo`, `logo`). Les **horaires** servent aussi à valider les créneaux de `POST /rendezvous`.
 
 Les montants (`prix`, `total`, `prixUnitaire`) restent de simples nombres : **aucune conversion**
 n'est faite quand la devise change (la propriétaire ressaisit ses prix).
@@ -166,13 +215,14 @@ n'est faite quand la devise change (la propriétaire ressaisit ses prix).
 
 - Notification à la propriétaire à chaque nouveau RDV/commande (e-mail, ou WhatsApp Business API).
 - SMS de confirmation au client quand le RDV passe en `accepted`.
-- Endpoint `GET /config` (horaires, contacts) pour que la propriétaire les modifie depuis l'admin.
+- Mot de passe oublié par e-mail.
 
 ## Exemple de routes Laravel
 
 ```php
 // routes/api.php
 Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
 
 Route::get('/piercings', [PiercingController::class, 'index']);
 Route::get('/bracelets', [BraceletController::class, 'index']);
@@ -182,7 +232,14 @@ Route::get('/rendezvous/creneaux-pris', [RendezVousController::class, 'creneauxP
 Route::post('/rendezvous', [RendezVousController::class, 'store'])->middleware('throttle:10,1');
 Route::post('/commandes',  [CommandeController::class, 'store'])->middleware('throttle:10,1');
 
-Route::middleware('auth:sanctum')->group(function () {
+// Client connecté : son espace
+Route::middleware('auth:sanctum')->prefix('moi')->group(function () {
+    Route::get('/rendezvous', [MoiController::class, 'rendezvous']);
+    Route::get('/commandes',  [MoiController::class, 'commandes']);
+});
+
+// Admin seulement (middleware à créer : vérifie role === 'admin', sinon 403)
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::apiResource('piercings', PiercingController::class)->except(['index', 'show']);
     Route::apiResource('bracelets', BraceletController::class)->except(['index', 'show']);
     Route::apiResource('galerie', GaleriePhotoController::class)->only(['store', 'update', 'destroy']);
