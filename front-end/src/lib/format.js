@@ -1,9 +1,26 @@
 import CONFIG from "../config.js";
 import { placeholder } from "./placeholder.js";
 
+/* ----- Devise : choisie par l'admin (onglet Réglages), USD par défaut ----- */
+export const DEVISES = {
+  USD: { label: "Dollar américain", symbole: "$ US" },
+  HTG: { label: "Gourde haïtienne", symbole: "HTG" },
+};
+let devise = DEVISES[CONFIG.devise] ? CONFIG.devise : "USD";
+export const getDevise = () => devise;
+export function setDevise(code) {
+  if (DEVISES[code]) devise = code;
+}
+export const symboleDevise = () => DEVISES[devise].symbole;
+
+/** 35 → "35 $US" ou "35 HTG" ; 12.5 → "12,50 $US" */
 export const formatPrix = (n) =>
-  Number(n).toLocaleString("fr-FR", { minimumFractionDigits: Number(n) % 1 ? 2 : 0, maximumFractionDigits: 2 }) +
-  " " + CONFIG.devise;
+  Number(n).toLocaleString("fr-FR", {
+    style: "currency",
+    currency: devise,
+    minimumFractionDigits: Number(n) % 1 ? 2 : 0,
+    maximumFractionDigits: 2,
+  });
 
 export const imageDe = (item, type) => item.image || placeholder(item.nom || item.legende || "DZ", type);
 

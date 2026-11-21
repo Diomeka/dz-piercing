@@ -175,6 +175,17 @@ const demoApi = {
       return wait(item);
     },
   },
+  // Réglages du site (devise…). Lecture publique, modification admin.
+  reglages: {
+    get: async () => wait({ devise: CONFIG.devise, ...(loadDb().reglages || {}) }),
+    update: async (data) => {
+      requireAdmin();
+      const db = loadDb();
+      db.reglages = { ...(db.reglages || {}), ...data };
+      saveDb(db);
+      return wait({ devise: CONFIG.devise, ...db.reglages });
+    },
+  },
   uploadImage: async (file) => { requireAdmin(); return resizeImage(file); },
   resetDemo: () => { storage.remove(DB_KEY); },
 };
@@ -235,6 +246,10 @@ const restApi = {
     booked: (date) => http("GET", `/rendezvous/creneaux-pris?date=${encodeURIComponent(date)}`),
   },
   commandes: restStatus("/commandes"),
+  reglages: {
+    get: () => http("GET", "/reglages"),
+    update: (data) => http("PUT", "/reglages", data),
+  },
   uploadImage: async (file) => {
     const form = new FormData();
     form.append("image", file);

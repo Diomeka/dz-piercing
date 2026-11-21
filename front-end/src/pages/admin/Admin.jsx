@@ -7,13 +7,15 @@ import { useToast } from "../../components/Toast.jsx";
 import Demandes from "./Demandes.jsx";
 import Catalogue from "./Catalogue.jsx";
 import GalerieAdmin from "./GalerieAdmin.jsx";
+import Reglages from "./Reglages.jsx";
 
 const ONGLETS = [
-  { id: "rdv", label: "Rendez-vous" },
+  { id: "rdv", label: "RDV" },
   { id: "commandes", label: "Commandes" },
   { id: "piercings", label: "Piercings" },
   { id: "bracelets", label: "Bracelets" },
   { id: "galerie", label: "Galerie" },
+  { id: "reglages", label: "Réglages" },
 ];
 
 function Connexion({ onOk }) {
@@ -120,6 +122,7 @@ export default function Admin() {
       {onglet === "piercings" && <Catalogue key="p" type="piercings" onError={surErreur} />}
       {onglet === "bracelets" && <Catalogue key="b" type="bracelets" onError={surErreur} />}
       {onglet === "galerie" && <GalerieAdmin onError={surErreur} />}
+      {onglet === "reglages" && <Reglages onChange={actualiser} onError={surErreur} />}
     </div>
   );
 }

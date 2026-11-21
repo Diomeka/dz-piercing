@@ -37,7 +37,7 @@ Prévoir un rate-limit (ex. `throttle:5,1`).
   "id": 1,
   "nom": "Hélix",
   "categorie": "Oreille",          // "Oreille" | "Visage" | "Bouche" | "Corps" (texte libre accepté)
-  "prix": 35,                       // nombre, en euros
+  "prix": 35,                       // nombre, dans la devise choisie (voir /reglages)
   "duree": 20,                      // minutes, nullable
   "cicatrisation": "3 à 6 mois",    // texte, nullable
   "description": "…",
@@ -145,6 +145,23 @@ Validations serveur attendues (POST) :
 | PATCH | `/commandes/{id}` | admin | `{ "statut": "accepted" \| "refused" \| "pending" }` |
 | DELETE | `/commandes/{id}` | admin | |
 
+## Réglages du site — `/reglages`
+
+Un seul objet de réglages (pas une liste). Pour l'instant : la devise des prix,
+choisie par la propriétaire dans l'onglet admin « Réglages ».
+
+```json
+{ "devise": "USD" }   // "USD" (dollar américain) | "HTG" (gourde haïtienne)
+```
+
+| Méthode | URL | Accès | Détails |
+|---|---|---|---|
+| GET | `/reglages` | **public** | lu au chargement du site, avant l'affichage des prix. Valeur par défaut si rien n'est enregistré : `{ "devise": "USD" }` |
+| PUT | `/reglages` | admin | corps `{ "devise": "HTG" }` → renvoie l'objet complet. Refuser (422) toute autre valeur que `USD` / `HTG`. |
+
+Les montants (`prix`, `total`, `prixUnitaire`) restent de simples nombres : **aucune conversion**
+n'est faite quand la devise change (la propriétaire ressaisit ses prix).
+
 ## Idées pour la suite (optionnel)
 
 - Notification à la propriétaire à chaque nouveau RDV/commande (e-mail, ou WhatsApp Business API).
@@ -160,6 +177,7 @@ Route::post('/auth/login', [AuthController::class, 'login'])->middleware('thrott
 Route::get('/piercings', [PiercingController::class, 'index']);
 Route::get('/bracelets', [BraceletController::class, 'index']);
 Route::get('/galerie',   [GaleriePhotoController::class, 'index']);
+Route::get('/reglages',  [ReglagesController::class, 'show']);
 Route::get('/rendezvous/creneaux-pris', [RendezVousController::class, 'creneauxPris']);
 Route::post('/rendezvous', [RendezVousController::class, 'store'])->middleware('throttle:10,1');
 Route::post('/commandes',  [CommandeController::class, 'store'])->middleware('throttle:10,1');
@@ -169,6 +187,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('bracelets', BraceletController::class)->except(['index', 'show']);
     Route::apiResource('galerie', GaleriePhotoController::class)->only(['store', 'update', 'destroy']);
     Route::post('/uploads', UploadController::class);
+    Route::put('/reglages', [ReglagesController::class, 'update']);
     Route::get('/rendezvous', [RendezVousController::class, 'index']);
     Route::patch('/rendezvous/{rendezVous}', [RendezVousController::class, 'updateStatut']);
     Route::delete('/rendezvous/{rendezVous}', [RendezVousController::class, 'destroy']);

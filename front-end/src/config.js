@@ -40,7 +40,9 @@ const CONFIG = {
   // Durée d'un créneau de rendez-vous (en minutes)
   dureeCreneau: 30,
 
-  devise: "€",
+  // Devise par défaut : "USD" (dollar américain) ou "HTG" (gourde haïtienne).
+  // Modifiable ensuite par l'admin dans l'onglet « Réglages ».
+  devise: "USD",
 
   // Photo de la page d'accueil (remplace par "ma-photo.jpg" (placée dans le dossier public))
   photoAccueil: "hero.svg",

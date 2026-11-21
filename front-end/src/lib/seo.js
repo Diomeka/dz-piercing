@@ -27,7 +27,7 @@ export function ficheCommerce() {
     address: { "@type": "PostalAddress", streetAddress: CONFIG.adresse, addressCountry: "FR" },
     openingHoursSpecification: horaires,
     sameAs: [CONFIG.instagram, CONFIG.tiktok].filter(Boolean),
-    priceRange: "€€",
+    priceRange: "$$",
   };
 }
 

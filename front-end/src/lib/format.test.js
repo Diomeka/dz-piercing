@@ -1,12 +1,24 @@
 import { describe, expect, it, vi, afterEach } from "vitest";
-import { couleurHex, creneauxDuJour, formatDate, formatPrix, lienWhatsApp, telValide, aujourdhui } from "./format.js";
+import { couleurHex, creneauxDuJour, formatDate, formatPrix, lienWhatsApp, telValide, aujourdhui, getDevise, setDevise, symboleDevise } from "./format.js";
 
 afterEach(() => vi.useRealTimers());
 
-describe("formatPrix", () => {
-  it("affiche les euros à la française", () => {
-    expect(formatPrix(35)).toBe("35 €");
-    expect(formatPrix(12.5).replace(/\s/g, " ")).toBe("12,50 €");
+describe("formatPrix (devise choisie par l'admin)", () => {
+  const net = (s) => s.replace(/\s/g, " "); // espaces insécables → espaces normaux
+  afterEach(() => setDevise("USD"));
+  it("affiche les dollars américains par défaut", () => {
+    expect(getDevise()).toBe("USD");
+    expect(net(formatPrix(35))).toBe("35 $US");
+    expect(net(formatPrix(12.5))).toBe("12,50 $US");
+  });
+  it("affiche les gourdes haïtiennes si l'admin les choisit", () => {
+    setDevise("HTG");
+    expect(net(formatPrix(1500))).toBe("1 500 HTG");
+    expect(symboleDevise()).toBe("HTG");
+  });
+  it("ignore une devise inconnue", () => {
+    setDevise("EUR");
+    expect(getDevise()).toBe("USD");
   });
 });
 

@@ -4,7 +4,7 @@ import useData, { Chargement, Erreur } from "../../components/useData.jsx";
 import Modal from "../../components/Modal.jsx";
 import Icon from "../../components/Icon.jsx";
 import { useToast } from "../../components/Toast.jsx";
-import { formatPrix, imageDe } from "../../lib/format.js";
+import { formatPrix, imageDe, symboleDevise } from "../../lib/format.js";
 import { placeholder } from "../../lib/placeholder.js";
 import { Pastilles } from "../Bracelets.jsx";
 import ImageUpload from "./ImageUpload.jsx";
@@ -56,7 +56,7 @@ function Formulaire({ type, initial, onClose, onSaved, onError }) {
           apercu={placeholder(f.nom || "Photo", type === "bracelets" ? "bracelet" : "piercing")} />
         <label className="field">Nom<input value={f.nom} onChange={set("nom")} placeholder={type === "piercings" ? "Ex : Hélix" : "Ex : Chaîne cubaine"} /></label>
         <div className="row-2">
-          <label className="field">Prix ({"€"})<input value={f.prix} onChange={set("prix")} inputMode="decimal" placeholder="35" /></label>
+          <label className="field">Prix ({symboleDevise()})<input value={f.prix} onChange={set("prix")} inputMode="decimal" placeholder="35" /></label>
           {type === "piercings" ? (
             <label className="field">Catégorie
               <select value={f.categorie} onChange={set("categorie")}>

@@ -411,3 +411,19 @@ legend { font-weight: 600; font-size: 0.95rem; margin-bottom: 8px; }
 .map-placeholder svg { color: var(--or-texte); }
 .map-placeholder small { color: var(--texte-2); }
 .map-placeholder:hover { border-color: var(--or-texte); }
+
+/* ------------------------------ Admin : réglages devise ------------------------------ */
+.devise-choix { display: grid; gap: 10px; }
+.devise-opt { display: flex; align-items: center; gap: 14px; padding: 14px 16px; min-height: 64px; border-radius: 14px; border: 1px solid var(--bord); background: var(--champ); cursor: pointer; }
+.devise-opt input { position: absolute; opacity: 0; pointer-events: none; }
+.devise-opt.active { border-color: var(--or-texte); box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.35); background: var(--surface); }
+.devise-opt:focus-within { outline: 3px solid var(--or); outline-offset: 2px; }
+.devise-code { flex: none; min-width: 58px; height: 40px; padding: 0 10px; border-radius: 10px; background: var(--or-degrade); color: #111; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; }
+
+/* Onglets admin : sur téléphone, 3 par ligne (tous visibles, pas de défilement caché) */
+.tabs { flex-wrap: wrap; overflow: visible; }
+.tabs .tab { flex: 1 1 calc(33.333% - 6px); min-width: 0; padding: 8px 6px; }
+@media (min-width: 760px) {
+  .tabs { flex-wrap: nowrap; }
+  .tabs .tab { flex: 1 0 auto; padding: 8px 14px; }
+}

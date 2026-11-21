@@ -52,4 +52,13 @@ describe("API — mode démo", () => {
     await api.piercings.remove(p.id);
     expect((await api.piercings.list()).some((x) => x.id === p.id)).toBe(false);
   });
+
+  it("enregistre la devise choisie (admin seulement)", async () => {
+    expect((await api.reglages.get()).devise).toBe("USD");
+    logout();
+    await expect(api.reglages.update({ devise: "HTG" })).rejects.toThrow();
+    await api.login("dz2026");
+    await api.reglages.update({ devise: "HTG" });
+    expect((await api.reglages.get()).devise).toBe("HTG");
+  });
 });
