@@ -101,7 +101,7 @@ export default function Layout() {
           <p className="footer-links">
             <Link to="/confidentialite">Mentions légales & confidentialité</Link>
           </p>
-          <p className="muted small">© {new Date().getFullYear()} {CONFIG.nomBoutique}</p>
+          <p className="muted small">© {new Date().getFullYear()} {CONFIG.nomBoutique} — Tous droits réservés</p>
         </div>
       </footer>
 

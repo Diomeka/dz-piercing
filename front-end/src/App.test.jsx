@@ -89,6 +89,7 @@ describe("Pied de page", () => {
     expect(pied.querySelector('a.reseau-facebook[aria-label="Facebook"]').href).toMatch(/^https:\/\/www\.facebook\.com\//);
     expect(pied.querySelector('a.reseau-whatsapp[aria-label="WhatsApp"]').href).toMatch(/^https:\/\/wa\.me\/509/);
     expect(pied.textContent).not.toMatch(/youtube/i);
+    expect(pied.textContent).toContain(`© ${new Date().getFullYear()} DZ PIERCING — Tous droits réservés`);
     const noms = [...pied.querySelectorAll(".paiement")].map((p) => p.dataset.nom);
     expect(noms).toEqual(["MonCash", "NatCash", "Virement bancaire"]);
   });
